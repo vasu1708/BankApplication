@@ -46,25 +46,21 @@ namespace BankApp.Services
                 throw new Exception("Account does not exist");
             CustomerService.Banks[this.BankName].Accounts.Remove(AccountNumber);
         }
-        public void TransactionHistory(string AccountNumber)
+        public List<string> TransactionHistory(string AccountNumber)
         {
+            List<string> History = new List<string>();
             Console.Write("Account Number : ");
             string accountNumber = Console.ReadLine();
             if (!CustomerService.Banks[this.BankName].Accounts.ContainsKey(accountNumber))
                 throw new Exception("Acount does not exist");
-            foreach (var tr in CustomerService.Banks[BankName].Transactions)
+            foreach (var TxnKey in CustomerService.Banks[BankName].Transactions.Keys)
             {
-                if (tr.SenderAccountId == CustomerService.Banks[BankName].Accounts[AccountNumber].AccountId || tr.ReceiverAccountId == CustomerService.Banks[BankName].Accounts[AccountNumber].AccountId)
+                if (CustomerService.Banks[BankName].Transactions[TxnKey].SenderAccountId == CustomerService.Banks[BankName].Accounts[AccountNumber].AccountId || CustomerService.Banks[BankName].Transactions[TxnKey].ReceiverAccountId == CustomerService.Banks[BankName].Accounts[AccountNumber].AccountId)
                 {
-                    Console.WriteLine("Id : ", tr.TransactionId);
-                    Console.WriteLine("Sender Id : ", tr.SenderAccountId);
-                    Console.WriteLine("Recciver Id : ", tr.ReceiverAccountId);
-                    Console.WriteLine("Amount : ", tr.Amount);
-                    Console.WriteLine("On : ", tr.TimeOfTransaction);
+                    History.Add(TxnKey);
                 }
             }
-
-
+            return History;
         }
         public void UpdateServiceChargeForSameBanks(decimal IMPSForSame,decimal RTGSForSame)
         {
@@ -89,13 +85,18 @@ namespace BankApp.Services
             CustomerService.Banks[this.BankName].Accounts[AccountNumber].Address = Address;
 
         }
-        public void RevertTransaction(string AccountNumber,string TransactionId)
+        public void RevertTransaction(string AccountNumber, string TransactionId)
         {
-            foreach(var tr in CustomerService.Banks[this.BankName].Transactions)
+            foreach(var TxnId in CustomerService.Banks[this.BankName].Transactions.Keys)
             {
-                if (tr.TransactionId == TransactionId)
-                    continue;
+                if (TxnId == TransactionId)
+                {
+                    CustomerService.Banks[this.BankName].Transactions.Remove(TxnId);
+                    break;
+                }
+                    
             }
+
         }
         public void UpdateCurrency(string AccountNumber,string Currency)
         {

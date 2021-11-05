@@ -1,10 +1,23 @@
 ﻿using BankApp.Models;
 using BankApp.Services;
 using System;
+using System.Collections.Generic;
+
 namespace BankApp.CLI
 {
     class Program
     {
+        static void Print(string BankName,List<string> History)
+        {
+            foreach (var Txn in History)
+            {
+                Console.WriteLine("Id : ", CustomerService.Banks[BankName].Transactions[Txn].TransactionId);
+                Console.WriteLine("Sender Id : ", CustomerService.Banks[BankName].Transactions[Txn].SenderAccountId);
+                Console.WriteLine("Recciver Id : ", CustomerService.Banks[BankName].Transactions[Txn].ReceiverAccountId);
+                Console.WriteLine("Amount : ", CustomerService.Banks[BankName].Transactions[Txn].Amount);
+                Console.WriteLine("On : ", CustomerService.Banks[BankName].Transactions[Txn].TimeOfTransaction);
+            }
+        }
         static string GetInput(string Message)
         {
             Console.Write(Message);
@@ -143,9 +156,11 @@ namespace BankApp.CLI
 
                                             case (int)Enums.CustomerOperation.TransactionHistory:
                                                 Password = GetInput("Account Password : ");
+                                                List<string> History;
                                                 try
                                                 {
-                                                    customer.TransactionHistory(BankName, AccountNumber, Password);
+                                                    History = customer.TransactionHistory(BankName, AccountNumber, Password);
+                                                    Print(BankName,History);
                                                 }
                                                 catch (Exception exception)
                                                 {
@@ -227,9 +242,11 @@ namespace BankApp.CLI
 
                                             case (int)Enums.ClerkOperation.TransactionHistory:
                                                 AccountNumber = GetInput("Account Number : ");
+                                                List<string> History;
                                                 try
                                                 {
-                                                    clerk.TransactionHistory(AccountNumber);
+                                                    History = clerk.TransactionHistory(AccountNumber);
+                                                    Print(BankName ,History);
                                                 }
                                                 catch (Exception exception)
                                                 {

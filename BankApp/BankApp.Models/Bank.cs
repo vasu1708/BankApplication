@@ -14,6 +14,6 @@ namespace BankApp.Models
         public decimal RTGSForOtherBank { get; set; }
         public decimal Balance { get; set; }
         public Dictionary<string,Account> Accounts { get; set; }
-        public List<Transaction> Transactions { get; set; }
+        public Dictionary<string,Transaction> Transactions { get; set; }
     }
 }

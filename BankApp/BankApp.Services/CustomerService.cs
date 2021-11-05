@@ -24,7 +24,7 @@ namespace BankApp.Services
             Random random = new Random();
             bank.AccountNumberGenerator = (UInt32) random.Next(111111111, 999999999);
             bank.Accounts = new Dictionary<string,Account>();
-            bank.Transactions = new List<Transaction>();
+            bank.Transactions = new Dictionary<string,Transaction>();
             ClerkService clerk = new ClerkService();
             clerk.BankName = BankName;
             clerk.ClerkId = $"{ClerkName}@{BankName}".ToUpper();
@@ -48,7 +48,7 @@ namespace BankApp.Services
             transaction.TypeOfTransaction = Enums.TransactionType.Credit.ToString();
             transaction.TimeOfTransaction = PointOfTime;
             transaction.Amount = Amount;
-            Banks[BankName].Transactions.Add(transaction);
+            Banks[BankName].Transactions.Add(transaction.TransactionId,transaction);
         }
         public void Withdraw(string BankName,string AccountNumber,decimal Amount,string Password)
         {
@@ -69,7 +69,7 @@ namespace BankApp.Services
             transaction.TypeOfTransaction = Enums.TransactionType.Debit.ToString();
             transaction.TimeOfTransaction = PointOfTime;
             transaction.Amount = Amount;
-            Banks[BankName].Transactions.Add(transaction);
+            Banks[BankName].Transactions.Add(transaction.TransactionId,transaction);
         }
         public void Transfer(string SenderBankName,string SenderAccountNumber,string ReceiverBankName,string ReceiverAccountNumber,decimal Amount,string Password,string TypeOfTransfer)
         {
@@ -109,7 +109,7 @@ namespace BankApp.Services
             senderTransaction.TypeOfTransaction = Enums.TransactionType.Debit.ToString();
             senderTransaction.TimeOfTransaction = PointOfTime;
             senderTransaction.Amount = Amount;
-            Banks[SenderBankName].Transactions.Add(senderTransaction);
+            Banks[SenderBankName].Transactions.Add(senderTransaction.TransactionId,senderTransaction);
 
             Transaction receiverTransaction = new Transaction();
             receiverTransaction.TransactionId = $"TXN{Banks[ReceiverBankName].BankId}{Banks[ReceiverBankName].Accounts[ReceiverAccountNumber].AccountId}{Date}";
@@ -118,25 +118,23 @@ namespace BankApp.Services
             receiverTransaction.TypeOfTransaction = Enums.TransactionType.Credit.ToString();
             receiverTransaction.TimeOfTransaction = PointOfTime;
             receiverTransaction.Amount = Amount;
-            Banks[ReceiverBankName].Transactions.Add(receiverTransaction);
+            Banks[ReceiverBankName].Transactions.Add(receiverTransaction.TransactionId,receiverTransaction);
         }
-        public void TransactionHistory(string BankName,string AccountNumber,string Password)
+        public List<string> TransactionHistory(string BankName,string AccountNumber,string Password)
         {
+            List<string> History = new List<string>();
             if (!Banks[BankName].Accounts.ContainsKey(AccountNumber))
                 throw new Exception("Acount does not exist");
             if (Password != Banks[BankName].Accounts[AccountNumber].Password)
                 throw new Exception("Incorrect Password");
-            foreach(var tr in Banks[BankName].Transactions)
+            foreach(var TxnKey in Banks[BankName].Transactions.Keys)
             {
-                if(tr.SenderAccountId==Banks[BankName].Accounts[AccountNumber].AccountId || tr.ReceiverAccountId== Banks[BankName].Accounts[AccountNumber].AccountId)
+                if(Banks[BankName].Transactions[TxnKey].SenderAccountId==Banks[BankName].Accounts[AccountNumber].AccountId || Banks[BankName].Transactions[TxnKey].ReceiverAccountId== Banks[BankName].Accounts[AccountNumber].AccountId)
                 {
-                    Console.WriteLine("Id : ", tr.TransactionId);
-                    Console.WriteLine("Sender Id : ", tr.SenderAccountId);
-                    Console.WriteLine("Recciver Id : ", tr.ReceiverAccountId);
-                    Console.WriteLine("Amount : ", tr.Amount);
-                    Console.WriteLine("On : ",tr.TimeOfTransaction);
+                    History.Add(TxnKey);
                 }
             }
+            return History;
         }
 
     }
