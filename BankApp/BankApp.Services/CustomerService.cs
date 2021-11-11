@@ -9,127 +9,127 @@ namespace BankApp.Services
     public class CustomerService
     {
         public static Dictionary<string, Bank> Banks = new Dictionary<string, Bank>();
-        public string AddBank(string BankName,string ClerkName,string Password)
+        public string AddBank(string bankName,string clerkName,string password)
         {
-            if (Banks.ContainsKey(BankName))
+            if (Banks.ContainsKey(bankName))
                 throw new Exception("Bank Name already exist");
             Bank bank = new Bank();
-            bank.BankName = BankName;
-            string Date = DateTime.Now.ToString("dd_MM_yyyy");
-            bank.BankId = BankName.Substring(0, 3) + Date;
+            bank.BankName = bankName;
+            string Date = DateTime.Now.ToString("dd-MM-yyyy");
+            bank.BankId = $"{bankName.Substring(0, 3)}{Date}";
             bank.IMPSForSameBank = 5;
             bank.RTGSForSameBank = 0;
             bank.IMPSForOtherBank = 2;
             bank.RTGSForOtherBank = 6;
+            bank.Currency = Enums.CurrencyType.INR; 
             Random random = new Random();
             bank.AccountNumberGenerator = (UInt32) random.Next(111111111, 999999999);
             bank.Accounts = new Dictionary<string,Account>();
             bank.Transactions = new Dictionary<string,Transaction>();
             ClerkService clerk = new ClerkService();
-            clerk.BankName = BankName;
-            clerk.ClerkId = $"{ClerkName}@{BankName}".ToUpper();
-            clerk.Password = Password;
+            clerk.BankName = bankName;
+            clerk.ClerkId = $"{clerkName}@{bankName}".ToUpper();
+            clerk.Password = password;
             ClerkService.Clerks[clerk.ClerkId] = clerk;
-            Banks[BankName] = bank;
+            Banks[bankName] = bank;
             return clerk.ClerkId;
         }   
-        public void Deposit(string BankName,string AccountNumber,decimal Amount)
+        public void Deposit(string bankName,string accountNumber,decimal amount)
         {
-            if (!Banks[BankName].Accounts.ContainsKey(AccountNumber))
+            if (!Banks[bankName].Accounts.ContainsKey(accountNumber))
                 throw new Exception("Account does not exist");
-            Banks[BankName].Accounts[AccountNumber].Balance += Amount;
+            Banks[bankName].Accounts[accountNumber].Balance += amount;
 
             DateTime PointOfTime = DateTime.Now;
-            string Date = DateTime.Now.ToString("dd_MM_yyyy");
+            string Date = DateTime.Now.ToString("dd-MM-yyyy");
             Transaction transaction = new Transaction();
-            transaction.TransactionId = $"TXN{Banks[BankName].BankId}{Banks[BankName].Accounts[AccountNumber].AccountId}{Date}";
+            transaction.TransactionId = $"TXN{Banks[bankName].BankId}{Banks[bankName].Accounts[accountNumber].AccountId}{Date}";
             transaction.SenderAccountId = "-";
-            transaction.ReceiverAccountId = Banks[BankName].Accounts[AccountNumber].AccountId;
-            transaction.TypeOfTransaction = Enums.TransactionType.Credit.ToString();
+            transaction.ReceiverAccountId = Banks[bankName].Accounts[accountNumber].AccountId;
+            transaction.TypeOfTransaction = Enums.TransactionType.CREDIT.ToString();
             transaction.TimeOfTransaction = PointOfTime;
-            transaction.Amount = Amount;
-            Banks[BankName].Transactions.Add(transaction.TransactionId,transaction);
+            transaction.Amount = amount;
+            Banks[bankName].Transactions.Add(transaction.TransactionId,transaction);
         }
-        public void Withdraw(string BankName,string AccountNumber,decimal Amount,string Password)
+        public void Withdraw(string bankName,string accountNumber,decimal amount,string password)
         {
-            if (!Banks[BankName].Accounts.ContainsKey(AccountNumber))
+            if (!Banks[bankName].Accounts.ContainsKey(accountNumber))
                 throw new Exception("Acount does not exist");
-            if (Password != Banks[BankName].Accounts[AccountNumber].Password)
+            if (password != Banks[bankName].Accounts[accountNumber].Password)
                 throw new Exception("Incorrect Password");
-            if (Banks[BankName].Accounts[AccountNumber].Balance < Amount)
+            if (Banks[bankName].Accounts[accountNumber].Balance < amount)
                 throw new Exception("Insufficient Balance");
-            Banks[BankName].Accounts[AccountNumber].Balance -= Amount;
+            Banks[bankName].Accounts[accountNumber].Balance -= amount;
 
             DateTime PointOfTime = DateTime.Now;
-            string Date = DateTime.Now.ToString("dd_MM_yyyy");
+            string Date = DateTime.Now.ToString("dd-MM-yyyy");
             Transaction transaction = new Transaction();
-            transaction.TransactionId = $"TXN{Banks[BankName].BankId}{Banks[BankName].Accounts[AccountNumber].AccountId}{Date}";
-            transaction.SenderAccountId = Banks[BankName].Accounts[AccountNumber].AccountId;
+            transaction.TransactionId = $"TXN{Banks[bankName].BankId}{Banks[bankName].Accounts[accountNumber].AccountId}{Date}";
+            transaction.SenderAccountId = Banks[bankName].Accounts[accountNumber].AccountId;
             transaction.ReceiverAccountId = "-";
-            transaction.TypeOfTransaction = Enums.TransactionType.Debit.ToString();
+            transaction.TypeOfTransaction = Enums.TransactionType.DEBIT.ToString();
             transaction.TimeOfTransaction = PointOfTime;
-            transaction.Amount = Amount;
-            Banks[BankName].Transactions.Add(transaction.TransactionId,transaction);
+            transaction.Amount = amount;
+            Banks[bankName].Transactions.Add(transaction.TransactionId,transaction);
         }
-        public void Transfer(string SenderBankName,string SenderAccountNumber,string ReceiverBankName,string ReceiverAccountNumber,decimal Amount,string Password,string TypeOfTransfer)
+        public void Transfer(string senderBankName,string senderAccountNumber,string receiverBankName,string receiverAccountNumber,decimal amount,string password,Enums.TypeOfTransfer typeOfTransfer)
         {
-            if (!Banks[SenderBankName].Accounts.ContainsKey(SenderAccountNumber))
+            if (!Banks[senderBankName].Accounts.ContainsKey(senderAccountNumber))
                 throw new Exception("Acount does not exist");
-            if (Banks[ReceiverBankName].Accounts.ContainsKey(ReceiverAccountNumber))
-                throw new Exception("Acount does not exist");
-            if (Password != Banks[SenderBankName].Accounts[SenderAccountNumber].Password)
+            if (!Banks[receiverBankName].Accounts.ContainsKey(receiverAccountNumber))
+                throw new Exception("The Account of receiver does not exist");
+            if (password != Banks[senderBankName].Accounts[senderAccountNumber].Password)
                 throw new Exception("Incorrect Pin");
-            Banks[SenderBankName].Accounts[SenderAccountNumber].Balance -= Amount;
-            
+            Banks[senderBankName].Accounts[senderAccountNumber].Balance -= amount;           
             decimal Charges;
-            if (SenderBankName == ReceiverBankName)
+            if (senderBankName == receiverBankName)
             {
-                if(TypeOfTransfer == "IMPS")
-                    Charges = Banks[SenderBankName].IMPSForSameBank * Amount / 100;
+                if(typeOfTransfer == Enums.TypeOfTransfer.IMPS)
+                    Charges = Banks[senderBankName].IMPSForSameBank * amount / 100;
                 else
-                    Charges = Banks[SenderBankName].RTGSForSameBank * Amount / 100;
+                    Charges = Banks[senderBankName].RTGSForSameBank * amount / 100;
             }
             else
             {
-                if(TypeOfTransfer=="IMPS")
-                    Charges = Banks[SenderBankName].IMPSForOtherBank * Amount / 100;
+                if(typeOfTransfer== Enums.TypeOfTransfer.IMPS)
+                    Charges = Banks[senderBankName].IMPSForOtherBank * amount / 100;
                 else
-                    Charges = Banks[SenderBankName].RTGSForOtherBank * Amount / 100;
+                    Charges = Banks[senderBankName].RTGSForOtherBank * amount / 100;
                 
             }
-            Banks[SenderBankName].Balance += Charges;
-            Amount -= Charges;
-            Banks[ReceiverBankName].Accounts[ReceiverAccountNumber].Balance += Amount;
+            Banks[senderBankName].Balance += Charges;
+            amount -= Charges;
+            Banks[receiverBankName].Accounts[receiverAccountNumber].Balance += amount;
             DateTime PointOfTime = DateTime.Now;
-            string Date = DateTime.Now.ToString("dd_MM_yyyy");
+            string Date = DateTime.Now.ToString("dd-MM-yyyy");
             Transaction senderTransaction = new Transaction();
-            senderTransaction.TransactionId = $"TXN{Banks[SenderBankName].BankId}{Banks[SenderBankName].Accounts[SenderAccountNumber].AccountId}{Date}";
-            senderTransaction.SenderAccountId = "-";
-            senderTransaction.ReceiverAccountId = Banks[ReceiverBankName].Accounts[ReceiverAccountNumber].AccountId;
-            senderTransaction.TypeOfTransaction = Enums.TransactionType.Debit.ToString();
+            senderTransaction.TransactionId = $"TXN{Banks[senderBankName].BankId}{Banks[senderBankName].Accounts[senderAccountNumber].AccountId}{Date}";
+            senderTransaction.SenderAccountId = Banks[senderBankName].Accounts[senderAccountNumber].AccountId;
+            senderTransaction.ReceiverAccountId = Banks[receiverBankName].Accounts[receiverAccountNumber].AccountId;
+            senderTransaction.TypeOfTransaction = Enums.TransactionType.DEBIT.ToString();
             senderTransaction.TimeOfTransaction = PointOfTime;
-            senderTransaction.Amount = Amount;
-            Banks[SenderBankName].Transactions.Add(senderTransaction.TransactionId,senderTransaction);
+            senderTransaction.Amount = amount;
+            Banks[senderBankName].Transactions.Add(senderTransaction.TransactionId,senderTransaction);
 
             Transaction receiverTransaction = new Transaction();
-            receiverTransaction.TransactionId = $"TXN{Banks[ReceiverBankName].BankId}{Banks[ReceiverBankName].Accounts[ReceiverAccountNumber].AccountId}{Date}";
-            receiverTransaction.SenderAccountId = Banks[SenderBankName].Accounts[SenderAccountNumber].AccountId;
-            receiverTransaction.ReceiverAccountId = "-";
-            receiverTransaction.TypeOfTransaction = Enums.TransactionType.Credit.ToString();
+            receiverTransaction.TransactionId = $"TXN{Banks[receiverBankName].BankId}{Banks[receiverBankName].Accounts[receiverAccountNumber].AccountId}{Date}";
+            receiverTransaction.SenderAccountId = Banks[senderBankName].Accounts[senderAccountNumber].AccountId;
+            receiverTransaction.ReceiverAccountId = Banks[receiverBankName].Accounts[receiverAccountNumber].AccountId;
+            receiverTransaction.TypeOfTransaction = Enums.TransactionType.CREDIT.ToString();
             receiverTransaction.TimeOfTransaction = PointOfTime;
-            receiverTransaction.Amount = Amount;
-            Banks[ReceiverBankName].Transactions.Add(receiverTransaction.TransactionId,receiverTransaction);
+            receiverTransaction.Amount = amount;
+            Banks[receiverBankName].Transactions.Add(receiverTransaction.TransactionId,receiverTransaction);
         }
-        public List<string> TransactionHistory(string BankName,string AccountNumber,string Password)
+        public List<string> TransactionHistory(string bankName,string accountNumber,string password)
         {
             List<string> History = new List<string>();
-            if (!Banks[BankName].Accounts.ContainsKey(AccountNumber))
+            if (!Banks[bankName].Accounts.ContainsKey(accountNumber))
                 throw new Exception("Acount does not exist");
-            if (Password != Banks[BankName].Accounts[AccountNumber].Password)
+            if (password != Banks[bankName].Accounts[accountNumber].Password)
                 throw new Exception("Incorrect Password");
-            foreach(var TxnKey in Banks[BankName].Transactions.Keys)
+            foreach(var TxnKey in Banks[bankName].Transactions.Keys)
             {
-                if(Banks[BankName].Transactions[TxnKey].SenderAccountId==Banks[BankName].Accounts[AccountNumber].AccountId || Banks[BankName].Transactions[TxnKey].ReceiverAccountId== Banks[BankName].Accounts[AccountNumber].AccountId)
+                if(Banks[bankName].Transactions[TxnKey].SenderAccountId==Banks[bankName].Accounts[accountNumber].AccountId || Banks[bankName].Transactions[TxnKey].ReceiverAccountId== Banks[bankName].Accounts[accountNumber].AccountId)
                 {
                     History.Add(TxnKey);
                 }

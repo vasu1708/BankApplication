@@ -8,30 +8,50 @@ namespace BankApp.Models
 {
     public class Enums
     {
-        
-        public enum TransactionType:byte { 
-            Credit,
-            Debit
+
+        public enum Action{
+            NEWBANK = 1,
+            LOGIN
+        }
+        public enum CurrencyType{ 
+            INR,
+            INUSD
+        }
+        public enum TransactionType{ 
+            CREDIT,
+            DEBIT
         }
         public enum Login
         {
-            AccountHolder = 1,
-                Bankstaff,
-                Exit
+            ACCOUNTHOLDER = 1,
+                BANKSTAFF,
+                EXIT
         }
         public enum CustomerOperation{
-            Deposit = 1,
-            Withdraw,
-            Transfer,
-            TransactionHistory,
-            Exit
+            DEPOSIT = 1,
+            WITHDRAW,
+            TRANSFER,
+            TRANSACTIONHISTORY,
+            EXIT
         }
         public enum ClerkOperation
         {
-            CreateAccount = 1,
-            DeleteAccount,
-            TransactionHistory,
-            Logout
+            CREATEACCOUNT = 1,
+            UPDATEACCOUNT,
+            DELETEACCOUNT,
+            TRANSACTIONHISTORY,
+            REVERTTRANSACTION,
+            UPDATECHARGES,
+            UPDATECURRENCY,
+            LOGOUT
+        }
+        public enum UpdateAccount
+        {
+            ADDRESS = 1,
+            MOBILENUMBER
+        }
+        public enum TypeOfTransfer {
+            RTGS,IMPS
         }
 
     }

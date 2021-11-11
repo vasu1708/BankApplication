@@ -11,6 +11,7 @@ namespace BankApp.Models
         public decimal IMPSForSameBank { get; set; }
         public decimal RTGSForSameBank { get; set; }
         public decimal IMPSForOtherBank { get; set; }
+        public Enums.CurrencyType Currency { get; set; }
         public decimal RTGSForOtherBank { get; set; }
         public decimal Balance { get; set; }
         public Dictionary<string,Account> Accounts { get; set; }
