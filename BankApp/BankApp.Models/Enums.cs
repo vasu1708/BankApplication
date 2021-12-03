@@ -53,6 +53,10 @@ namespace BankApp.Models
         public enum TypeOfTransfer {
             RTGS,IMPS
         }
+        public enum Gender
+        {
+            M,F,O
+        }
 
     }
 }

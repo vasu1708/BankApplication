@@ -7,19 +7,16 @@ namespace BankApp.CLI
 {
     class Program
     {
-        static void PutOutput(string bankName, List<string> history)
+        static void PutOutput(List<string> history)
         {
-            PutOutputLine("TRANSACTION HISTORY");
+            PutOutputLine("<---TRANSACTION HISTORY--->");
             if (history.Count == 0)
                 PutOutputLine("No Transactions yet!");
             else
             foreach (var Txn in history)
             {
-                PutOutputLine($"Id : {CustomerService.Banks[bankName].Transactions[Txn].TransactionId}");
-                PutOutputLine($"Sender Id :  {CustomerService.Banks[bankName].Transactions[Txn].SenderAccountId}");
-                PutOutputLine($"Recciver Id :  {CustomerService.Banks[bankName].Transactions[Txn].ReceiverAccountId}");
-                PutOutputLine($"Amount :  {CustomerService.Banks[bankName].Transactions[Txn].Amount}");
-                PutOutputLine($"On :  {CustomerService.Banks[bankName].Transactions[Txn].TimeOfTransaction}");
+                PutOutputLine($"TransactionId SenderId ReceiverId Type Amount Time Avl.Bal");
+                PutOutputLine(Txn);
             }
         }
         static void PutOutput(string message)
@@ -35,13 +32,13 @@ namespace BankApp.CLI
             PutOutput(message);
             return Console.ReadLine();
         }
-        static string GetUpperCaseStringInput(string message)
+        static string GetLowerCaseStringInput(string message)
         {
-            return GetStringInput(message).ToUpper();
+            return GetStringInput(message).ToLower();
         }
-        static string GetUpperCaseStringInputWithoutSpaces(string message)
+        static string GetLowerCaseStringInputWithoutSpaces(string message)
         {
-            return GetStringInput(message).ToUpper().Replace(" ", "");
+            return GetLowerCaseStringInput(message).Replace(" ", "");
         }
         static decimal GetDecimalInput(string message)
         {
@@ -157,6 +154,22 @@ namespace BankApp.CLI
                 }
             }
         }
+        static Enums.Gender GetGenderTypeInput(string message)
+        {
+            Enums.Gender input;
+            while (true)
+            {
+                try
+                {
+                    input = (Enums.Gender)Enum.Parse(typeof(Enums.Gender), GetStringInput(message).ToUpper());
+                    return input;
+                }
+                catch
+                {
+                    PutOutputLine("Wrong Input!");
+                }
+            }
+        }
         static Enums.CurrencyType GetCurrencyTypeInput(string message)
         {
             Enums.CurrencyType input;
@@ -189,6 +202,16 @@ namespace BankApp.CLI
                 }
             }
         }
+        static string GetAddress()
+        {
+            
+            string ColonyName = GetStringInput("Colony Name : ");
+            int StreetNo = GetIntegerInput("Street No : ");
+            string HouseNo = GetStringInput("House No : ");
+            string DistrictName = GetStringInput("District Name : ");
+            string StateName = GetStringInput("State Name : ");
+            return $"{ColonyName}\nStreet No:{StreetNo}\n{HouseNo}\n{DistrictName}\n{StateName}";
+        }
         static void Main(string[] args)
         {
             string BankName,Message,AccountNumber,Password;
@@ -202,21 +225,21 @@ namespace BankApp.CLI
                     switch (Action)
                     {
                         case Enums.Action.NEWBANK:                        
-                            BankName = GetUpperCaseStringInputWithoutSpaces("Bank Name To Setup : ");
+                            BankName = GetLowerCaseStringInputWithoutSpaces("Bank Name To Setup : ");
                             if (BankName.Length<=3)
                             {
                                 PutOutputLine("Bank Name is too short!");
                                 break;
                             }
-                            string ClerkName = GetUpperCaseStringInputWithoutSpaces("Add Clerk Name : ");
+                            string ClerkName = GetLowerCaseStringInputWithoutSpaces("Add Clerk Name : ");
                             Password = GetStringInput("Set Password : ");
-                            string ClerkId = customer.AddBank(BankName,ClerkName,Password);
-                            PutOutputLine($"{BankName} is eshtablished, Remember! clerk Id : {ClerkId}");
+                            string Id = customer.AddBank(BankName,ClerkName,Password);
+                            PutOutputLine($"{BankName} is eshtablished, Remember! clerk Id : {Id}");
                             break;
 
                         case Enums.Action.LOGIN:                        
-                            BankName = GetUpperCaseStringInputWithoutSpaces("Enter Bank Name : ");
-                            if (!CustomerService.Banks.ContainsKey(BankName))
+                            BankName = GetLowerCaseStringInputWithoutSpaces("Enter Bank Name : ");
+                            if (!DatabaseConnectionService.IsBankExist(BankName))
                             {
                                 PutOutputLine("Bank doesn't exist!");
                                 break;
@@ -245,21 +268,21 @@ namespace BankApp.CLI
                                                     switch (CustOp)
                                                     {
                                                         case Enums.CustomerOperation.DEPOSIT:
-                                                            Amount = GetDecimalInput($"Enter Amount ({CustomerService.Banks[BankName].Currency}) : ");
+                                                            Amount = GetDecimalInput($"Enter Amount ({DatabaseConnectionService.GetAccountCurrencyType(AccountNumber)}) : ");
                                                             customer.Deposit(BankName, AccountNumber, Amount);
                                                             PutOutputLine("Successfully! Deposited your amount");
                                                             break;
 
                                                         case Enums.CustomerOperation.WITHDRAW:
-                                                            Amount = GetDecimalInput($"Enter Amount ({CustomerService.Banks[BankName].Currency}) : ");
+                                                            Amount = GetDecimalInput($"Enter Amount ({DatabaseConnectionService.GetAccountCurrencyType(AccountNumber)}) : ");
                                                             Password = GetStringInput("Account Password : ");
                                                             customer.Withdraw(BankName, AccountNumber, Amount, Password);
                                                             PutOutputLine("Successfully! withdrawed your amount");
                                                             break;
 
                                                         case Enums.CustomerOperation.TRANSFER:
-                                                            Amount = GetDecimalInput($"Enter Amount ({CustomerService.Banks[BankName].Currency}) : ");
-                                                            string ReceiverBankName = GetUpperCaseStringInputWithoutSpaces("Reciever Bank Name : ");
+                                                            Amount = GetDecimalInput($"Enter Amount ({DatabaseConnectionService.GetAccountCurrencyType(AccountNumber)}) : ");
+                                                            string ReceiverBankName = GetLowerCaseStringInputWithoutSpaces("Reciever Bank Name : ");
                                                             string ReceiverAccountNumber = GetStringInput("Receiver Account Number : ");
                                                             Enums.TypeOfTransfer TypeOfTransfer = GetTransferTypeInput("Type of Transfer (IMPS/RTGS) : ");
                                                             Password = GetStringInput("Account Password : ");
@@ -271,7 +294,7 @@ namespace BankApp.CLI
                                                             Password = GetStringInput("Account Password : ");
                                                             List<string> History;
                                                             History = customer.TransactionHistory(BankName, AccountNumber, Password);
-                                                            PutOutput(BankName, History);
+                                                            PutOutput(History);
                                                             break;
 
                                                         case Enums.CustomerOperation.EXIT:
@@ -290,7 +313,7 @@ namespace BankApp.CLI
                                             break;
 
                                         case Enums.Login.BANKSTAFF:
-                                            string Id = GetUpperCaseStringInput("Clerk ID : ");
+                                            Id = GetLowerCaseStringInput("Clerk ID : ");
                                             Password = GetStringInput("Password : ");
                                             if (!ClerkService.Clerks.ContainsKey(Id) || ClerkService.Clerks[Id].Password != Password)
                                             {
@@ -298,9 +321,10 @@ namespace BankApp.CLI
                                                 break;
                                             }
                                             ClerkService clerk = ClerkService.Clerks[Id];
-                                            string Name, MobileNumber, Gender;
+                                            string Name, MobileNumber;
+                                            Enums.Gender Gender;
                                             bool ClerkFlag = true;
-                                            Address address;
+                                            string address;
                                             Enums.ClerkOperation ClerkOp;
                                             while (ClerkFlag)
                                             {
@@ -318,13 +342,8 @@ namespace BankApp.CLI
                                                                 break;
                                                             }
                                                             MobileNumber = GetStringInput("Mobile No : ");
-                                                            Gender = GetStringInput("Gender : ");
-                                                            address = new Address();
-                                                            address.ColonyName = GetStringInput("Colony Name : ");
-                                                            address.StreetNo = GetIntegerInput("Street No : ");
-                                                            address.HouseNo = GetStringInput("House No : ");
-                                                            address.DistrictName = GetStringInput("District Name : ");
-                                                            address.StateName = GetStringInput("State Name : ");
+                                                            Gender = GetGenderTypeInput("Gender (M/F/O) : ");
+                                                            address = GetAddress();
                                                             Password = GetStringInput("set Account Password : ");
                                                             AccountNumber = clerk.CreateAccount(Name, MobileNumber, Gender, address, Password);
                                                             PutOutputLine($"Account is created, Account Number is : {AccountNumber}");
@@ -337,13 +356,7 @@ namespace BankApp.CLI
                                                             {
                                                                 case Enums.UpdateAccount.ADDRESS:
                                                                     AccountNumber = GetStringInput("Account Number : ");
-                                                                    address = new Address();
-                                                                    PutOutputLine("New Address : ");
-                                                                    address.ColonyName = GetStringInput("Colony Name : ");
-                                                                    address.StreetNo = GetIntegerInput("Street No : ");
-                                                                    address.HouseNo = GetStringInput("House No : ");
-                                                                    address.DistrictName = GetStringInput("District Name : ");
-                                                                    address.StateName = GetStringInput("State Name : ");
+                                                                    address = GetAddress();
                                                                     clerk.UpdateAddress(AccountNumber, address);
                                                                     PutOutputLine("Successfully! updated the address");
                                                                     break;
@@ -369,7 +382,7 @@ namespace BankApp.CLI
                                                             AccountNumber = GetStringInput("Account Number : ");
                                                             List<string> History;
                                                             History = clerk.TransactionHistory(AccountNumber);
-                                                            PutOutput(BankName, History);
+                                                            PutOutput(History);
                                                             break;
 
                                                         case Enums.ClerkOperation.REVERTTRANSACTION:
@@ -390,9 +403,10 @@ namespace BankApp.CLI
                                                             break;
 
                                                         case Enums.ClerkOperation.UPDATECURRENCY:
+                                                            AccountNumber = GetStringInput("Account Number : ");
                                                             Enums.CurrencyType currency = GetCurrencyTypeInput("New Currency (INR/INUSD) : ");
-                                                            clerk.UpdateCurrency(currency);
-                                                            PutOutputLine("Successfully! Updates the Currency");
+                                                            clerk.UpdateCurrency(AccountNumber,currency);
+                                                            PutOutputLine("Successfully! Updated the Currency");
                                                             break;
 
                                                         case Enums.ClerkOperation.LOGOUT:
