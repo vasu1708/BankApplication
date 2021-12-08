@@ -5,8 +5,7 @@ namespace BankApp.Services
 {
     public class CustomerService
     {
-        //public static Dictionary<string, Bank> Banks = new Dictionary<string, Bank>();
-        public string AddBank(string bankName,string clerkName,string password)
+        public string AddBank(string bankName,string clerkName,string dob,string address,string password,decimal salary)
         {
             if (DatabaseService.IsBankExist(bankName))
                 throw new Exception("Bank Name already exist");
@@ -16,22 +15,20 @@ namespace BankApp.Services
             decimal RTGSChargesOther = 0;
             decimal IMPSChargesSame = 2;
             decimal IMPSChargesOther = 6;
-            DatabaseService.InsertIntoBank(bankName,BankId,RTGSChargesSame,RTGSChargesOther,IMPSChargesSame,IMPSChargesOther);
-            //DatabaseConnectionService.AddClerk(BankId,clerkName,password);
-            ClerkService clerk = new ClerkService();
-            clerk.BankName = bankName;
-            string Id = $"{clerkName}@{bankName}";
-            clerk.ClerkId = Id;
-            clerk.Password = password;
-            ClerkService.Clerks[Id] = clerk;
-            return Id;
+            DatabaseService.InsertIntoBank(bankName,BankId,RTGSChargesSame,RTGSChargesOther,IMPSChargesSame,IMPSChargesOther,Date);
+            string clerkId = $"{clerkName}@{bankName}";
+            string doj = Date;
+            DatabaseService.InsertIntoClerk(BankId, clerkName, clerkId,password,dob,address,salary,doj);
+            return clerkId;
         }   
         public void Deposit(string bankName,string accountNumber,decimal amount)
         {
             if (!DatabaseService.IsAccountExist(bankName,accountNumber))
                 throw new Exception("Account does not exist");
             string TypeOfTransaction = Enums.TransactionType.CREDIT.ToString();
-            DatabaseService.UpdateAccountBalance(accountNumber,TypeOfTransaction,amount);
+            decimal Balance = DatabaseService.FetchAccountBalance(accountNumber);
+            Balance += amount;
+            DatabaseService.UpdateAccountBalance(accountNumber,TypeOfTransaction,Balance);
             DateTime PointOfTime = DateTime.Now;
             string Date = DateTime.Now.ToString("yyyy-MM-dd");
             string BankId = DatabaseService.GetBankId(bankName);
@@ -39,7 +36,7 @@ namespace BankApp.Services
             string TransactionId = $"TXN{BankId}{AccountId}{Date}";
             string SenderAccountId = "-";
             string ReceiverAccountId = "-";
-            DatabaseService.InsertTransaction(bankName,accountNumber,TransactionId,SenderAccountId,ReceiverAccountId,TypeOfTransaction,amount,PointOfTime);
+            DatabaseService.InsertTransaction(BankId,accountNumber,TransactionId,SenderAccountId,ReceiverAccountId,TypeOfTransaction,amount,PointOfTime);
         }
         public void Withdraw(string bankName,string accountNumber,decimal amount,string password)
         {
@@ -47,10 +44,12 @@ namespace BankApp.Services
                 throw new Exception("Acount does not exist");
             if (!DatabaseService.VerifyAccountPassword(accountNumber,password))
                 throw new Exception("Incorrect Password");
-            if (DatabaseService.FetchAccountBalance(accountNumber) < amount)
+            decimal Balance = DatabaseService.FetchAccountBalance(accountNumber);
+            if ( Balance < amount)
                 throw new Exception("Insufficient Balance");
             string TypeOfTransaction = Enums.TransactionType.DEBIT.ToString();
-            DatabaseService.UpdateAccountBalance(accountNumber,TypeOfTransaction,amount);
+            Balance -= amount;
+            DatabaseService.UpdateAccountBalance(accountNumber,TypeOfTransaction,Balance);
             DateTime PointOfTime = DateTime.Now;
             string Date = DateTime.Now.ToString("dd-MM-yyyy");
             string BankId = DatabaseService.GetBankId(bankName);
@@ -58,7 +57,7 @@ namespace BankApp.Services
             string TransactionId = $"TXN{BankId}{AccountId}{Date}";
             string SenderAccountId = "-";
             string ReceiverAccountId = "-";
-            DatabaseService.InsertTransaction(bankName,accountNumber,TransactionId, SenderAccountId, ReceiverAccountId, TypeOfTransaction, amount,PointOfTime);
+            DatabaseService.InsertTransaction(BankId,accountNumber,TransactionId, SenderAccountId, ReceiverAccountId, TypeOfTransaction, amount,PointOfTime);
         }
         public void Transfer(string senderBankName,string senderAccountNumber,string receiverBankName,string receiverAccountNumber,decimal amount,string password,Enums.TypeOfTransfer typeOfTransfer)
         {
@@ -68,7 +67,9 @@ namespace BankApp.Services
                 throw new Exception("The Account of receiver does not exist");
             if (!DatabaseService.VerifyAccountPassword(senderAccountNumber, password))
                 throw new Exception("Incorrect Pin");
-            
+            decimal Balance = DatabaseService.FetchAccountBalance(senderAccountNumber);
+            if (Balance < amount)
+                throw new Exception("Insufficient Balance");
             string Date = DateTime.Now.ToString("dd-MM-yyyy");
             string SenderBankId = DatabaseService.GetBankId(senderBankName);
             string SenderAccountId = DatabaseService.GetAccountId(senderBankName,senderAccountNumber);
@@ -77,6 +78,7 @@ namespace BankApp.Services
             string ReceiverAccountId = DatabaseService.GetAccountId(receiverBankName,receiverAccountNumber);
             string TypeOfTransaction = Enums.TransactionType.DEBIT.ToString();
             DateTime PointOfTime = DateTime.Now;
+            Balance -= amount;
             DatabaseService.UpdateAccountBalance(senderAccountNumber, "DEBIT", amount);
             DatabaseService.InsertTransaction(senderBankName, senderAccountNumber, TransactionId, SenderAccountId, ReceiverAccountId, TypeOfTransaction, amount, PointOfTime);
             decimal Charges;
@@ -96,9 +98,12 @@ namespace BankApp.Services
                 
             }
             amount -= Charges;
+            Balance = DatabaseService.FetchAccountBalance(receiverAccountNumber);
             DatabaseService.UpdateAccountBalance(receiverAccountNumber, "CREDIT", amount);
             DatabaseService.InsertTransaction(receiverBankName,receiverAccountNumber,TransactionId, SenderAccountId, ReceiverAccountId, TypeOfTransaction, amount, PointOfTime);
-            DatabaseService.UpdateBankBalance(senderBankName,Charges);
+            Balance = DatabaseService.FetchBankBalance(SenderBankId);
+            Balance += Charges;
+            DatabaseService.UpdateBankBalance(senderBankName,Balance);
         }
         public List<string> TransactionHistory(string bankName,string accountNumber,string password)
         {
