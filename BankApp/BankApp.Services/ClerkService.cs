@@ -7,111 +7,75 @@ using BankApp.Models;
 
 namespace BankApp.Services
 {
-    public class ClerkService
+    internal class ClerkService
     {
-        public static Dictionary<string,ClerkService> Clerks= new Dictionary<string,ClerkService>();
-        public string ClerkId { get; set; }
-        public string Password { get; set; }
-        public string BankName { get; set; }
-
-        public static string GenerateAccountNumber(string bankName)
+        public static string GetAccountNumber()
         {
-            CustomerService.Banks[bankName].AccountNumberGenerator += 1;
-            UInt32 AccountNumber = CustomerService.Banks[bankName].AccountNumberGenerator;
-            return AccountNumber.ToString();
+            Random random = new Random();
+            uint AccountNo = (UInt32)random.Next(111111111, 999999999);
+            return AccountNo.ToString();
         }
-        
-        public string CreateAccount(string name, string mobileNumber,string gender,Address address,string password)
+        public string GetAccountId(string accountNumber)
         {
-            if (CustomerService.Banks[this.BankName].Accounts.ContainsKey(name))
-                throw new Exception("Account exist on this name");
-            Account account = new Account();
-            account.AccountHolderName = name;
-            string date = DateTime.Now.ToString("dd-MM-yyyy");
-            account.AccountId = $"{name.Substring(0, 3)}{date}";
-            account.AccountNumber = GenerateAccountNumber(this.BankName);
-            account.MobileNumber = mobileNumber;
-            account.Gender = gender;
-            account.Address = address;
-            //account.Message = "Your account is created Successfully!";
-            account.Balance = 0;
-            account.Password = password;
-            CustomerService.Banks[this.BankName].Accounts[account.AccountNumber] = account;
-            return account.AccountNumber;
+            
+            BankDbContext context = new BankDbContext();
+            var accountId = context.Accounts.Single(x=>x.AccountNumber==accountNumber).AccountId;
+            return accountId;
+        }
+        public bool IsAccountExist(string accountNumber)
+        {
+            BankDbContext context = new BankDbContext();
+            if(new BankDbContext().Accounts.Any(x => x.AccountNumber == accountNumber))
+                return true;
+            return false;
+        }
+        public void CreateAccount(string name,string password,String address,Enums.Gender gender,DateOnly dob,string mobileNumber)
+        {
+            
+            BankDbContext context = new BankDbContext();
+            if (context.Accounts.Any(x => x.AccountHolderName == name))
+                throw new Exception("Account already exist on this name");
+            string date = DateTime.Now.ToString("yyyy-MM-dd");
+            string accountId = $"{name.Substring(0, 3)}{date}";
+            Account account = new Account()
+            {
+                AccountId = accountId,
+                BankId = "ANDB",
+                AccountHolderName = name,
+                AccountNumber = GetAccountNumber(),
+                AccountPassword = password,
+                AccountBalance = 0,
+                Address = address,
+                Gender = gender,
+                DateOfBirth = dob,
+                MobileNumber = mobileNumber,
+                Currency = Enums.CurrencyType.INR,
+                AccountCreationDate = DateOnly.FromDateTime(DateTime.Now)
+            };
+            context.Accounts.Add(account);
+            context.SaveChanges();
         }
         public void DeleteAccount(string accountNumber)
         {
-            if (!CustomerService.Banks[this.BankName].Accounts.ContainsKey(accountNumber))
-                throw new Exception("Account does not exist");
-            CustomerService.Banks[this.BankName].Accounts.Remove(accountNumber);
+            BankDbContext context = new BankDbContext();
+            string accountId = GetAccountId(accountNumber);
+            var account = context.Accounts.Single(x => x.AccountId == accountId);
+            context.Accounts.Remove(account);
+            context.SaveChanges();
         }
-        public List<string> TransactionHistory(string accountNumber)
+        public List<Transaction> TransactionHistory(string accountNumber)
         {
-            List<string> History = new List<string>();
-            if (!CustomerService.Banks[this.BankName].Accounts.ContainsKey(accountNumber))
-                throw new Exception("Acount does not exist");
-            foreach (var TxnKey in CustomerService.Banks[BankName].Transactions.Keys)
-            {
-                if (CustomerService.Banks[BankName].Transactions[TxnKey].SenderAccountId == CustomerService.Banks[BankName].Accounts[accountNumber].AccountId || CustomerService.Banks[BankName].Transactions[TxnKey].ReceiverAccountId == CustomerService.Banks[BankName].Accounts[accountNumber].AccountId)
-                {
-                    History.Add(TxnKey);
-                }
-            }
-            return History;
+            BankDbContext context = new BankDbContext();
+            string accountId = GetAccountId(accountNumber);
+            return context.Transactions.Where(x => x.Accountid == accountId).ToList();
         }
-        public void UpdateServiceCharges(decimal chargeOfIMPSForSame,decimal chargeOfRTGSForSame, decimal chargeOfIMPSForOther, decimal chargeOfRTGSForOther)
+        public void RevertTransaction(string transactionId)
         {
-            CustomerService.Banks[this.BankName].IMPSForSameBank = chargeOfIMPSForSame;
-            CustomerService.Banks[this.BankName].RTGSForSameBank = chargeOfRTGSForSame;
-            CustomerService.Banks[this.BankName].IMPSForOtherBank = chargeOfIMPSForOther;
-            CustomerService.Banks[this.BankName].RTGSForOtherBank = chargeOfRTGSForOther;
-        }      
-        public void UpdateMobileNumber(string accountNumber,string mobileNumber)
-        {
-            if (!CustomerService.Banks[this.BankName].Accounts.ContainsKey(accountNumber))
-                throw new Exception("Account does not exist");
-            CustomerService.Banks[this.BankName].Accounts[accountNumber].MobileNumber =  mobileNumber;
-        }
-        public void UpdateAddress(string accountNumber,Address address)
-        {
-            if (!CustomerService.Banks[this.BankName].Accounts.ContainsKey(accountNumber))
-                throw new Exception("Account does not exist");
-            CustomerService.Banks[this.BankName].Accounts[accountNumber].Address = address;
-
-        }
-        public void RevertTransaction(string accountNumber, string transactionId)
-        {
-            if (!CustomerService.Banks[this.BankName].Accounts.ContainsKey(accountNumber))
-                throw new Exception("Account does not exist");
-            foreach (var TxnId in CustomerService.Banks[this.BankName].Transactions.Keys)
-            {
-                if (TxnId == transactionId)
-                {
-                    CustomerService.Banks[this.BankName].Transactions.Remove(TxnId);
-                    break;
-                }
-                    
-            }
-
-        }
-        public void UpdateCurrency(Enums.CurrencyType currency)
-        {
-            if (CustomerService.Banks[this.BankName].Currency == currency)
-                throw new Exception("New Currency is same as Existing!");
-            CustomerService.Banks[this.BankName].Currency = currency;
-            decimal ConversionRatio = 1;
-
-            if (currency == Enums.CurrencyType.INUSD)
-                ConversionRatio = 1 / 70;
-            else if (currency == Enums.CurrencyType.INR)
-                ConversionRatio = 70;
-            CustomerService.Banks[this.BankName].Balance *= ConversionRatio;
-            foreach (var account in CustomerService.Banks[this.BankName].Accounts.Keys)
-            {
-                CustomerService.Banks[this.BankName].Accounts[account].Balance *= ConversionRatio;
-            }
-                
+            BankDbContext context = new BankDbContext();
+            var transaction = context.Transactions.Single(x => x.TransactionId == transactionId);
+            if (transaction == null)
+                throw new Exception("Invalid Transaction");
+            context.Transactions.Remove(transaction);
         }
     }
-    
 }

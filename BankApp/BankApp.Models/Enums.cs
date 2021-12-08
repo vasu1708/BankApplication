@@ -8,26 +8,29 @@ namespace BankApp.Models
 {
     public class Enums
     {
-
-        public enum Action{
+        public enum Action
+        {
             NEWBANK = 1,
             LOGIN
         }
-        public enum CurrencyType{ 
+        public enum CurrencyType
+        {
             INR,
             INUSD
         }
-        public enum TransactionType{ 
+        public enum TransactionType
+        {
             CREDIT,
             DEBIT
         }
         public enum Login
         {
             ACCOUNTHOLDER = 1,
-                BANKSTAFF,
-                EXIT
+            BANKSTAFF,
+            EXIT
         }
-        public enum CustomerOperation{
+        public enum CustomerOperation
+        {
             DEPOSIT = 1,
             WITHDRAW,
             TRANSFER,
@@ -50,9 +53,13 @@ namespace BankApp.Models
             ADDRESS = 1,
             MOBILENUMBER
         }
-        public enum TypeOfTransfer {
-            RTGS,IMPS
+        public enum TypeOfTransfer
+        {
+            RTGS, IMPS
         }
-
+        public enum Gender
+        {
+            M, F, O
+        }
     }
 }
