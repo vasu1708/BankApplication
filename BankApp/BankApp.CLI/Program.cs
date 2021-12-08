@@ -99,7 +99,7 @@ namespace BankApp.CLI
 
                         case Enums.Action.LOGIN:                        
                             BankName = GetLowerCaseWithoutSpaces("Enter Bank Name : ");
-                            if (!DatabaseConnectionService.IsBankExist(BankName))
+                            if (!DatabaseService.IsBankExist(BankName))
                             {
                                 DisplayOutputLine("Bank doesn't exist!");
                                 break;
@@ -128,20 +128,20 @@ namespace BankApp.CLI
                                                     switch (CustOp)
                                                     {
                                                         case Enums.CustomerOperation.DEPOSIT:
-                                                            Amount = GetDecimal($"Enter Amount ({DatabaseConnectionService.GetAccountCurrencyType(AccountNumber)}) : ");
+                                                            Amount = GetDecimal($"Enter Amount ({DatabaseService.GetAccountCurrencyType(AccountNumber)}) : ");
                                                             customer.Deposit(BankName, AccountNumber, Amount);
                                                             DisplayOutputLine("Successfully! Deposited your amount");
                                                             break;
 
                                                         case Enums.CustomerOperation.WITHDRAW:
-                                                            Amount = GetDecimal($"Enter Amount ({DatabaseConnectionService.GetAccountCurrencyType(AccountNumber)}) : ");
+                                                            Amount = GetDecimal($"Enter Amount ({DatabaseService.GetAccountCurrencyType(AccountNumber)}) : ");
                                                             Password = GetString("Account Password : ");
                                                             customer.Withdraw(BankName, AccountNumber, Amount, Password);
                                                             DisplayOutputLine("Successfully! withdrawed your amount");
                                                             break;
 
                                                         case Enums.CustomerOperation.TRANSFER:
-                                                            Amount = GetDecimal($"Enter Amount ({DatabaseConnectionService.GetAccountCurrencyType(AccountNumber)}) : ");
+                                                            Amount = GetDecimal($"Enter Amount ({DatabaseService.GetAccountCurrencyType(AccountNumber)}) : ");
                                                             string ReceiverBankName = GetLowerCaseWithoutSpaces("Reciever Bank Name : ");
                                                             string ReceiverAccountNumber = GetString("Receiver Account Number : ");
                                                             Enums.TypeOfTransfer TypeOfTransfer = GetEnum<Enums.TypeOfTransfer>("Type of Transfer (IMPS/RTGS) : ");

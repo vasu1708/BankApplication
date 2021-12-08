@@ -24,56 +24,56 @@ namespace BankApp.Services
             string AccountId = $"{name.Substring(0, 3)}{date}";
             string AccountNumber = GenerateAccountNumber(this.BankName);
             string Password = password;
-            DatabaseConnectionService.InsertIntoAccount(this.BankName,name,AccountId,AccountNumber,mobileNumber,gender,address,password);
+            DatabaseService.InsertIntoAccount(this.BankName,name,AccountId,AccountNumber,mobileNumber,gender,address,password);
             return AccountNumber;
         }
         public void DeleteAccount(string accountNumber)
         {
-            if (!DatabaseConnectionService.IsAccountExist(this.BankName,accountNumber))
+            if (!DatabaseService.IsAccountExist(this.BankName,accountNumber))
                 throw new Exception("Account does not exist");
-            DatabaseConnectionService.DeleteFromAccount(accountNumber);
+            DatabaseService.DeleteFromAccount(accountNumber);
         }
         public List<string> TransactionHistory(string accountNumber)
         {
             List<string> History = new List<string>();
-            if (!DatabaseConnectionService.IsAccountExist(this.BankName,accountNumber))
+            if (!DatabaseService.IsAccountExist(this.BankName,accountNumber))
                 throw new Exception("Acount does not exist");
-            History = DatabaseConnectionService.FetchAccountTransactions(accountNumber);
+            History = DatabaseService.FetchAccountTransactions(accountNumber);
             return History;
         }
         public void UpdateServiceCharges(decimal chargeOfIMPSForSame,decimal chargeOfRTGSForSame, decimal chargeOfIMPSForOther, decimal chargeOfRTGSForOther)
         {
-            DatabaseConnectionService.UpdateCharges(this.BankName,chargeOfIMPSForSame, chargeOfIMPSForOther,chargeOfRTGSForSame, chargeOfRTGSForOther);
+            DatabaseService.UpdateCharges(this.BankName,chargeOfIMPSForSame, chargeOfIMPSForOther,chargeOfRTGSForSame, chargeOfRTGSForOther);
         }      
         public void RevertTransaction(string accountNumber, string transactionId)
         {
-            if (!DatabaseConnectionService.IsAccountExist(this.BankName,accountNumber))
+            if (!DatabaseService.IsAccountExist(this.BankName,accountNumber))
                 throw new Exception("Account does not exist");
-            DatabaseConnectionService.DeleteFromTransaction(transactionId);
+            DatabaseService.DeleteFromTransaction(transactionId);
 
         }
         public void UpdateCurrency(string accountNumber,Enums.CurrencyType currency)
         {
-            if (!DatabaseConnectionService.IsAccountExist(this.BankName, accountNumber))
+            if (!DatabaseService.IsAccountExist(this.BankName, accountNumber))
                 throw new Exception("Account does not exist");
-            string CurrencyType = DatabaseConnectionService.GetAccountCurrencyType(accountNumber);
+            string CurrencyType = DatabaseService.GetAccountCurrencyType(accountNumber);
             if (CurrencyType == currency.ToString())
                 throw new Exception("New Currency is same as Existing!");
-            DatabaseConnectionService.UpdateCurrency(accountNumber, currency.ToString());
+            DatabaseService.UpdateCurrency(accountNumber, currency.ToString());
             
             
         }
         public void UpdateAddress(string accountNumber,string address)
         {
-            if (!DatabaseConnectionService.IsAccountExist(this.BankName, accountNumber))
+            if (!DatabaseService.IsAccountExist(this.BankName, accountNumber))
                 throw new Exception("Account does not exist");
-              DatabaseConnectionService.UpdateAddress(accountNumber, address);
+              DatabaseService.UpdateAddress(accountNumber, address);
         }
         public void UpdateMobileNumber(string accountNumber,string mobileNumber)
         {
-            if (!DatabaseConnectionService.IsAccountExist(this.BankName, accountNumber))
+            if (!DatabaseService.IsAccountExist(this.BankName, accountNumber))
                 throw new Exception("Account does not exist");
-            DatabaseConnectionService.UpdateMobileNumber(accountNumber, mobileNumber);
+            DatabaseService.UpdateMobileNumber(accountNumber, mobileNumber);
         }
     }
     

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace BankApp.Services
 {
-    public class DatabaseConnectionService
+    public class DatabaseService
     {
         private static MySqlConnection Connection { get; set; }
         
