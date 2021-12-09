@@ -16,7 +16,7 @@ namespace BankApp.Services
             decimal IMPSChargesSame = 2;
             decimal IMPSChargesOther = 6;
             DatabaseService.InsertIntoBank(bankName,BankId,RTGSChargesSame,RTGSChargesOther,IMPSChargesSame,IMPSChargesOther,Date);
-            string clerkId = $"{clerkName}@{bankName}";
+            string clerkId = $"{clerkName}@{bankName.Replace(" ","").ToLower()}";
             string doj = Date;
             DatabaseService.InsertIntoClerk(BankId, clerkName, clerkId,password,dob,address,mobileNumber,salary,doj);
             return clerkId;
@@ -41,12 +41,12 @@ namespace BankApp.Services
         public void Withdraw(string bankName,string accountNumber,decimal amount,string password)
         {
             if (!DatabaseService.IsAccountExist(bankName, accountNumber))
-                throw new Exception("Acount does not exist");
-            if (!DatabaseService.VerifyAccountPassword(accountNumber,password))
-                throw new Exception("Incorrect Password");
+                throw new Exception("Acount does not exist!");
+            if (DatabaseService.FetchAccountPassword(accountNumber) != password)
+                throw new Exception("Incorrect Password!");
             decimal Balance = DatabaseService.FetchAccountBalance(accountNumber);
             if ( Balance < amount)
-                throw new Exception("Insufficient Balance");
+                throw new Exception("Insufficient Balance!");
             string TypeOfTransaction = Enums.TransactionType.DEBIT.ToString();
             Balance -= amount;
             DatabaseService.UpdateAccountBalance(accountNumber,TypeOfTransaction,Balance);
@@ -62,14 +62,14 @@ namespace BankApp.Services
         public void Transfer(string senderBankName,string senderAccountNumber,string receiverBankName,string receiverAccountNumber,decimal amount,string password,Enums.TypeOfTransfer typeOfTransfer)
         {
             if (!DatabaseService.IsAccountExist(senderBankName, senderAccountNumber))
-                throw new Exception("Acount does not exist");
+                throw new Exception("Acount does not exist!");
             if (!DatabaseService.IsAccountExist(receiverBankName, receiverAccountNumber))
-                throw new Exception("The Account of receiver does not exist");
-            if (!DatabaseService.VerifyAccountPassword(senderAccountNumber, password))
-                throw new Exception("Incorrect Pin");
+                throw new Exception("The Account of receiver does not exist!");
+            if (DatabaseService.FetchAccountPassword(senderAccountNumber) != password)
+                throw new Exception("Incorrect Password!");
             decimal Balance = DatabaseService.FetchAccountBalance(senderAccountNumber);
             if (Balance < amount)
-                throw new Exception("Insufficient Balance");
+                throw new Exception("Insufficient Balance!");
             string Date = DateTime.Now.ToString("dd-MM-yyyy");
             string SenderBankId = DatabaseService.GetBankId(senderBankName);
             string SenderAccountId = DatabaseService.GetAccountId(senderBankName,senderAccountNumber);
@@ -110,7 +110,7 @@ namespace BankApp.Services
             List<string> History = new List<string>();
             if (!DatabaseService.IsAccountExist(bankName,accountNumber))
                 throw new Exception("Acount does not exist");
-            if (!DatabaseService.VerifyAccountPassword(accountNumber,password))
+            if (DatabaseService.FetchAccountPassword(accountNumber)!=password)
                 throw new Exception("Incorrect Password");
             History = DatabaseService.FetchAccountTransactions(accountNumber);
             return History;

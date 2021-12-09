@@ -14,15 +14,13 @@ namespace BankApp.Services
             OpenConnection("localhost", "BankDB", "srinivas", "Mysql@1234");
             return new MySqlCommand(query, Connection);
         }
-        public static bool IsAuthorized(string id,string password)
+        public static string FetchClerkPassword(string id)
         {
             string Query = $"SELECT  password FROM Clerk WHERE ClerkId = @clerkid";
             MySqlCommand cmd= OpenConnectionAndCreateCommand(Query);
             cmd.Parameters.Add("@clerkid", MySqlDbType.VarChar).Value = id;
             string Key = (string)ExecuteScalarAndCloseConnection(cmd);
-            if (password == Key)
-                return true;
-            return false;
+            return Key;
         }
         public static void OpenConnection(string serverName,string databaseName,string userId,string password)
         {
@@ -96,15 +94,13 @@ namespace BankApp.Services
             cmd.Parameters.Add("@balance", MySqlDbType.VarChar).Value = balance;
             ExecuteNonQueryAndCloseConnection(cmd);
         }
-        public static bool VerifyAccountPassword(string accountNumber,string password)
+        public static string FetchAccountPassword(string accountNumber)
         {
             string Query = $"SELECT  password FROM Account WHERE AccountNumber = @accountNo";
             MySqlCommand cmd = OpenConnectionAndCreateCommand(Query);
             cmd.Parameters.Add("@accountNo", MySqlDbType.VarChar).Value = accountNumber;
             string Key = (string) ExecuteScalarAndCloseConnection(cmd);
-            if (password == Key)
-                return true;
-            return false;
+            return Key;
         }
         public static void UpdateBankBalance(string bankName,decimal balance)
         {

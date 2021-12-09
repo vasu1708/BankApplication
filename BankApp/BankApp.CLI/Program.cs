@@ -21,13 +21,8 @@ namespace BankApp.CLI
                     switch (Action)
                     {
                         case Enums.Action.NEWBANK:                        
-                            BankName = IOMethods.GetLowerCaseWithoutSpaces("Bank Name To Setup : ");
-                            if (BankName.Length<=3)
-                            {
-                                IOMethods.DisplayOutputLine("Bank Name is too short!");
-                                break;
-                            }
-                            string ClerkName = IOMethods.GetLowerCaseWithoutSpaces("Add Clerk Name : ");
+                            BankName = IOMethods.GetName("Bank Name To Setup : ");
+                            string ClerkName = IOMethods.GetName("Add Clerk Name : ");
                             Password = IOMethods.GetString("Set Password : ");
                             string dob = IOMethods.GetDOB("Enter Date Of Birth(DD-MM-YYYY) : ");
                             decimal salary = IOMethods.GetDecimal("Enter Salary(INR) : ");
@@ -38,10 +33,10 @@ namespace BankApp.CLI
                             break;
 
                         case Enums.Action.LOGIN:                        
-                            BankName = IOMethods.GetLowerCaseWithoutSpaces("Enter Bank Name : ");
+                            BankName = IOMethods.GetName("Enter Bank Name : ");
                             if (!DatabaseService.IsBankExist(BankName))
                             {
-                                IOMethods.DisplayOutputLine("Bank doesn't exist!");
+                                IOMethods.DisplayOutputLine("No such Bank exist!");
                                 break;
                             }
                             bool LoginFlag = true;
@@ -82,8 +77,8 @@ namespace BankApp.CLI
 
                                                         case Enums.CustomerOperation.TRANSFER:
                                                             Amount = IOMethods.GetDecimal($"Enter Amount ({DatabaseService.GetAccountCurrencyType(AccountNumber)}) : ");
-                                                            string ReceiverBankName = IOMethods.GetLowerCaseWithoutSpaces("Reciever Bank Name : ");
-                                                            string ReceiverAccountNumber = IOMethods.GetString("Receiver Account Number : ");
+                                                            string ReceiverBankName = IOMethods.GetName("Reciever Bank Name : ");
+                                                            string ReceiverAccountNumber = IOMethods.GetName("Receiver Account Number : ");
                                                             Enums.TypeOfTransfer TypeOfTransfer = IOMethods.GetEnum<Enums.TypeOfTransfer>("Type of Transfer (IMPS/RTGS) : ");
                                                             Password = IOMethods.GetString("Account Password : ");
                                                             customer.Transfer(BankName, AccountNumber, ReceiverBankName, ReceiverAccountNumber, Amount, Password, TypeOfTransfer);
@@ -115,9 +110,9 @@ namespace BankApp.CLI
                                         case Enums.Login.BANKSTAFF:
                                             Id = IOMethods.GetLowerCase("Clerk ID : ");
                                             Password = IOMethods.GetString("Password : ");
-                                            if (!DatabaseService.IsAuthorized(Id,Password))
+                                            if (Password!=DatabaseService.FetchClerkPassword(Id) || Password=="")
                                             {
-                                                IOMethods.DisplayOutputLine("Invalid ID or Password");
+                                                IOMethods.DisplayOutputLine("Invalid Id or Password");
                                                 break;
                                             }
                                             ClerkService clerk = new ClerkService();
@@ -136,11 +131,6 @@ namespace BankApp.CLI
                                                     {
                                                         case Enums.ClerkOperation.CREATEACCOUNT:
                                                             Name = IOMethods.GetString("Name : ");
-                                                            if(Name.Length <= 3)
-                                                            {
-                                                                IOMethods.DisplayOutputLine("Name is too short!");
-                                                                break;
-                                                            }
                                                             MobileNumber = IOMethods.GetMobileNumber("Mobile No : ");
                                                             Gender = IOMethods.GetEnum<Enums.Gender>("Gender (M/F/O) : ");
                                                             address = IOMethods.GetAddress();

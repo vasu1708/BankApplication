@@ -41,10 +41,6 @@ namespace BankApp.Services
         {
             return GetString(message).ToLower();
         }
-        public static string GetLowerCaseWithoutSpaces(string message)
-        {
-            return GetLowerCase(message).Replace(" ", "");
-        }
         public static decimal GetDecimal(string message)
         {
             if (Decimal.TryParse(GetString(message), out decimal value))
@@ -69,23 +65,23 @@ namespace BankApp.Services
         }
         public static string GetAddress()
         {
-            Console.WriteLine("Address Details");
-            string ColonyName = GetString("Colony Name : ");
+            DisplayOutputLine("Address Details");
+            string ColonyName = GetName("Colony Name : ");
             int StreetNo = GetInteger("Street No : ");
-            string HouseNo = GetString("House No : ");
-            string DistrictName = GetString("District Name : ");
-            string StateName = GetString("State Name : ");
+            int HouseNo = GetInteger("House No : ");
+            string DistrictName = GetName("District Name : ");
+            string StateName = GetName("State Name : ");
             return $"{ColonyName}\nStreet No:{StreetNo}\n{HouseNo}\n{DistrictName}\n{StateName}";
         }
         public static string GetMobileNumber(string message)
         {
             string mobileNumber = GetString(message);
-            if(message.Length<10 || message.Length>10)
-            {
-                DisplayOutputLine("mobile number should consist of 10 digits!");
-                return GetMobileNumber(message);
-            }
-            return mobileNumber;
+            Regex mobileNoPattern = new Regex(@"[0-9]{10}");
+            if(mobileNoPattern.IsMatch(mobileNumber))
+                return mobileNumber;
+            DisplayOutputLine("Proper MobileNumber must be given!");
+            return GetMobileNumber(message);
+            
         }
         public static string GetDOB(string message)
         {
@@ -97,8 +93,17 @@ namespace BankApp.Services
                 return dob;
             }
                 
-            DisplayOutputLine("Invalid format of date!");
+            DisplayOutputLine("Proper Date format must be given!");
             return GetDOB(message);
+        }
+        public static string GetName(string message)
+        {
+            string name = GetString(message);
+            Regex NamePattern = new Regex(@"^[a-z\sA-Z]{4,}$");
+            if (NamePattern.IsMatch(name))
+                return name;
+            DisplayOutputLine("Proper Name must be given!");
+            return GetName(message);
         }
     }
 }

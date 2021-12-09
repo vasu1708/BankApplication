@@ -48,7 +48,6 @@ namespace BankApp.Services
             DatabaseService.DeleteFromTransaction(transactionId);
 
         }
-        
         public void UpdateCurrency(string bankName,string accountNumber,Enums.CurrencyType currency)
         {
             if (!DatabaseService.IsAccountExist(bankName, accountNumber))
