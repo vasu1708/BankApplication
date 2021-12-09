@@ -29,10 +29,11 @@ namespace BankApp.CLI
                             }
                             string ClerkName = IOMethods.GetLowerCaseWithoutSpaces("Add Clerk Name : ");
                             Password = IOMethods.GetString("Set Password : ");
-                            string dob = IOMethods.GetString("Enter Date Of Birth : ");
+                            string dob = IOMethods.GetDOB("Enter Date Of Birth(DD-MM-YYYY) : ");
                             decimal salary = IOMethods.GetDecimal("Enter Salary(INR) : ");
                             string Address = IOMethods.GetAddress();
-                            string Id = customer.AddBank(BankName,ClerkName,dob,Address,Password,salary);
+                            string MobileNumber = IOMethods.GetMobileNumber("Enter Mobile No : ");
+                            string Id = customer.AddBank(BankName,ClerkName,dob,Address,Password,MobileNumber,salary);
                             IOMethods.DisplayOutputLine($"{BankName} is eshtablished, Remember! clerk Id : {Id}");
                             break;
 
@@ -120,7 +121,7 @@ namespace BankApp.CLI
                                                 break;
                                             }
                                             ClerkService clerk = new ClerkService();
-                                            string Name, MobileNumber;
+                                            string Name;
                                             Enums.Gender Gender;
                                             bool ClerkFlag = true;
                                             string address;
@@ -140,11 +141,11 @@ namespace BankApp.CLI
                                                                 IOMethods.DisplayOutputLine("Name is too short!");
                                                                 break;
                                                             }
-                                                            MobileNumber = IOMethods.GetString("Mobile No : ");
+                                                            MobileNumber = IOMethods.GetMobileNumber("Mobile No : ");
                                                             Gender = IOMethods.GetEnum<Enums.Gender>("Gender (M/F/O) : ");
                                                             address = IOMethods.GetAddress();
                                                             Password = IOMethods.GetString("set Account Password : ");
-                                                            dob = IOMethods.GetString("Enter Date of Birth");
+                                                            dob = IOMethods.GetDOB("Enter Date of Birth(DD-MM-YYYY)");
                                                             AccountNumber = clerk.CreateAccount(BankName,Name, MobileNumber, Gender, address,dob, Password);
                                                             IOMethods.DisplayOutputLine($"Account is created, Account Number is : {AccountNumber}");
                                                             break;
@@ -162,7 +163,7 @@ namespace BankApp.CLI
                                                                     break;
                                                                 case Enums.UpdateAccount.MOBILENUMBER:
                                                                     AccountNumber = IOMethods.GetString("Account Number : ");
-                                                                    MobileNumber = IOMethods.GetString("New Mobile Number : ");
+                                                                    MobileNumber = IOMethods.GetMobileNumber("New Mobile Number : ");
                                                                     clerk.UpdateMobileNumber(BankName,AccountNumber,MobileNumber);
                                                                     IOMethods.DisplayOutputLine("Successfully! Updated the mobile number");
                                                                     break;

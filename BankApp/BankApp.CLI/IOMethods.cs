@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace BankApp.Services
 {
@@ -75,6 +76,29 @@ namespace BankApp.Services
             string DistrictName = GetString("District Name : ");
             string StateName = GetString("State Name : ");
             return $"{ColonyName}\nStreet No:{StreetNo}\n{HouseNo}\n{DistrictName}\n{StateName}";
+        }
+        public static string GetMobileNumber(string message)
+        {
+            string mobileNumber = GetString(message);
+            if(message.Length<10 || message.Length>10)
+            {
+                DisplayOutputLine("mobile number should consist of 10 digits!");
+                return GetMobileNumber(message);
+            }
+            return mobileNumber;
+        }
+        public static string GetDOB(string message)
+        {
+            string dob = GetString(message);
+            Regex dobpattern = new Regex(@"^\d{2}-\d{2}-\d{4}$");
+            if(dobpattern.IsMatch(dob))
+            {
+                dob = $"{dob.Substring(6)}-{dob.Substring(3, 2)}-{dob.Substring(0, 2)}";
+                return dob;
+            }
+                
+            DisplayOutputLine("Invalid format of date!");
+            return GetDOB(message);
         }
     }
 }

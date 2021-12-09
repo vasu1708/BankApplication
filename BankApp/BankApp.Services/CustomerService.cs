@@ -5,7 +5,7 @@ namespace BankApp.Services
 {
     public class CustomerService
     {
-        public string AddBank(string bankName,string clerkName,string dob,string address,string password,decimal salary)
+        public string AddBank(string bankName,string clerkName,string dob,string address,string password,string mobileNumber,decimal salary)
         {
             if (DatabaseService.IsBankExist(bankName))
                 throw new Exception("Bank Name already exist");
@@ -18,7 +18,7 @@ namespace BankApp.Services
             DatabaseService.InsertIntoBank(bankName,BankId,RTGSChargesSame,RTGSChargesOther,IMPSChargesSame,IMPSChargesOther,Date);
             string clerkId = $"{clerkName}@{bankName}";
             string doj = Date;
-            DatabaseService.InsertIntoClerk(BankId, clerkName, clerkId,password,dob,address,salary,doj);
+            DatabaseService.InsertIntoClerk(BankId, clerkName, clerkId,password,dob,address,mobileNumber,salary,doj);
             return clerkId;
         }   
         public void Deposit(string bankName,string accountNumber,decimal amount)

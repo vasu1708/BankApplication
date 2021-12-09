@@ -49,10 +49,10 @@ namespace BankApp.Services
             ExecuteNonQueryAndCloseConnection(cmd);
         }
 
-        public static void InsertIntoClerk(string bankId ,string clerkName,string clerkId,string password,string dob,string address,decimal salary,string doj)
+        public static void InsertIntoClerk(string bankId ,string clerkName,string clerkId,string password,string dob,string address,string mobileNumber,decimal salary,string doj)
         {
-            string Query = @"INSERT INTO Clerk(clerkName,ClerkId,BankId,Password,DOB,DOJ,Address,Salary) 
-                             VALUES(@clerkName,@clerkId,@BankId,@password,@dob,@doj,@address,@salary)";
+            string Query = @"INSERT INTO Clerk(clerkName,ClerkId,BankId,Password,DOB,DOJ,Address,MobileNumber,Salary) 
+                             VALUES(@clerkName,@clerkId,@BankId,@password,@dob,@doj,@address,@mobileNo,@salary)";
             MySqlCommand cmd = OpenConnectionAndCreateCommand(Query);
             cmd.Parameters.Add("@clerkName", MySqlDbType.VarChar).Value = clerkName;
             cmd.Parameters.Add("@clerkId", MySqlDbType.VarChar).Value = clerkId;
@@ -61,6 +61,7 @@ namespace BankApp.Services
             cmd.Parameters.Add("@dob", MySqlDbType.Date).Value = dob;
             cmd.Parameters.Add("@doj", MySqlDbType.Date).Value = doj;
             cmd.Parameters.Add("@address", MySqlDbType.VarChar).Value = address;
+            cmd.Parameters.Add("mobileNo",MySqlDbType.VarChar).Value = mobileNumber;
             cmd.Parameters.Add("@salary", MySqlDbType.Decimal).Value = salary;
             ExecuteNonQueryAndCloseConnection(cmd);
         }
@@ -80,7 +81,7 @@ namespace BankApp.Services
             decimal Amount = (decimal) ExecuteScalarAndCloseConnection(cmd);
             return Amount;
         }
-        public static void InsertTransaction(string bankId,string accountNumber,string transactionId,string senderAccountId,string receiverAccountId,string typeOfTransaction,string amount,DateTime pointOfTime)
+        public static void InsertTransaction(string bankId,string accountNumber,string transactionId,string senderAccountId,string receiverAccountId,string typeOfTransaction,decimal amount,DateTime pointOfTime)
         {
             string Query = @"INSERT INTO Transaction(BankId,AccountNumber,TransactionId,SenderAccountId,ReceiverAccountId,TransactionType,Amount,TransactionTime,Avl_Bal) 
                               VALUES(@bankId,@accountNo,@txnId,@senderAccId,@receiverAccId,@txnType,@amount,@time,@balance)";
