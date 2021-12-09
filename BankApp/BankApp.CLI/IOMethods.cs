@@ -89,8 +89,19 @@ namespace BankApp.Services
             Regex dobpattern = new Regex(@"^\d{2}-\d{2}-\d{4}$");
             if(dobpattern.IsMatch(dob))
             {
-                dob = $"{dob.Substring(6)}-{dob.Substring(3, 2)}-{dob.Substring(0, 2)}";
-                return dob;
+                int day = int.Parse(dob.Substring(0, 2));
+                int month = int.Parse(dob.Substring(3, 2));
+                int year = int.Parse(dob.Substring(6));
+                int validYear = int.Parse(DateTime.Now.ToString("dd-MM-yyyy").Substring(6))-18;
+                if(day>0 && day<32 && month>0 && month<13 && year>1930 && year < validYear)
+                {
+                    dob = $"{year}-{month}-{day}";
+                    return dob;
+                }
+                    
+                DisplayOutputLine("Proper Date must be given or You are under age!");
+                return GetDOB(message);
+
             }
                 
             DisplayOutputLine("Proper Date format must be given!");
