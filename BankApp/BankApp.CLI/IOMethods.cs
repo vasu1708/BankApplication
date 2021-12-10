@@ -71,7 +71,7 @@ namespace BankApp.Services
             int HouseNo = GetInteger("House No : ");
             string DistrictName = GetName("District Name : ");
             string StateName = GetName("State Name : ");
-            return $"{ColonyName}\nStreet No:{StreetNo}\n{HouseNo}\n{DistrictName}\n{StateName}";
+            return $"{ColonyName}-{StreetNo}-{HouseNo}-{DistrictName}-{StateName}";
         }
         public static string GetMobileNumber(string message)
         {
