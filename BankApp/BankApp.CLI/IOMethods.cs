@@ -6,29 +6,29 @@ namespace BankApp.Services
 {
     public class IOMethods
     {
-        public static void DisplayOutput(List<string> history)
+        public  static void DisplayOutput(List<string> history)
         {
             DisplayOutputLine("<---TRANSACTION HISTORY--->");
             if (history.Count != 0)
                 DisplayOutputLine("No Transactions yet!");
             else
             {
-                DisplayOutputLine($"TransactionId SenderId ReceiverId Type Amount Time Avl.Bal");
+                DisplayOutputLine($"transactionId SenderId ReceiverId Type Amount Time Avl.Bal");
                 foreach (var Txn in history)
                 {
                     DisplayOutputLine(Txn);
                 }
             }
         }
-        public static void DisplayOutput(string message)
+        public  static void DisplayOutput(string message)
         {
             Console.Write(message);
         }
-        public static void DisplayOutputLine(string message)
+        public  static void DisplayOutputLine(string message)
         {
             Console.WriteLine(message);
         }
-        public static string GetString(string message)
+        public  static string GetString(string message)
         {
             DisplayOutput(message);
             string input = Console.ReadLine();
@@ -37,11 +37,11 @@ namespace BankApp.Services
             DisplayOutputLine("input cannot be empty!");
             return GetString(message);
         }
-        public static string GetLowerCase(string message)
+        public  static string GetLowerCase(string message)
         {
             return GetString(message).ToLower();
         }
-        public static decimal GetDecimal(string message)
+        public  static decimal GetDecimal(string message)
         {
             if (Decimal.TryParse(GetString(message), out decimal value))
                 return value;
@@ -55,7 +55,7 @@ namespace BankApp.Services
             DisplayOutputLine("Invalid input!");
             return GetInteger(message);
         }
-        public static T GetEnum<T>(string message)
+        public static  T GetEnum<T>(string message)
             where T : struct
         {
             if (Enum.TryParse<T>(GetString(message), out T value))
@@ -99,19 +99,19 @@ namespace BankApp.Services
                     return dob;
                 }
                     
-                DisplayOutputLine("Proper Date must be given or You are under age!");
+                DisplayOutputLine("Proper date must be given or You are under age!");
                 return GetDOB(message);
 
             }
                 
-            DisplayOutputLine("Proper Date format must be given!");
+            DisplayOutputLine("Proper date format must be given!");
             return GetDOB(message);
         }
         public static string GetName(string message)
         {
             string name = GetString(message);
-            Regex NamePattern = new Regex(@"^[a-z\sA-Z]{4,}$");
-            if (NamePattern.IsMatch(name))
+            Regex namePattern = new Regex(@"^[a-z\sA-Z]{4,}$");
+            if (namePattern.IsMatch(name))
                 return name;
             DisplayOutputLine("Proper Name must be given!");
             return GetName(message);

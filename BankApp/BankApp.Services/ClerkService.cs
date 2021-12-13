@@ -7,27 +7,26 @@ namespace BankApp.Services
 {
     public class ClerkService
     {
-        public static string GenerateAccountNumber(string bankName)
+        public  string GenerateAccountNumber(string bankName)
         {
             Random random = new Random();
             uint AccountNo = (UInt32)random.Next(111111111, 999999999);
             return AccountNo.ToString();
         }
         
-        public static string CreateAccount(string bankName,string name, string mobileNumber,Enums.Gender gender,string address,string dob,string password)
+        public  string CreateAccount(string bankName,string name, string mobileNumber,Enums.Gender gender,string address,string dob,string password)
         {
             string date = DateTime.Now.ToString("yyyy-MM-dd");
-            string AccountId = $"{name.Substring(0, 3)}{date}";
+            string accountId = $"{name.Substring(0, 3)}{date}";
             string doc = date;
-            string AccountNumber = GenerateAccountNumber(bankName);
-            string Password = password;
-            string BankId = GetBankId(bankName);
-            string Query = @"INSERT INTO Account(BankId,AccountId,AccountNumber,Name,Gender,MobileNumber,Password,Address,Balance,Currency,DOB,DOC) 
+            string accountNumber = GenerateAccountNumber(bankName);
+            string bankId = GetBankId(bankName);
+            string query = @"INSERT INTO Account(bankId,accountId,accountNumber,Name,Gender,MobileNumber,Password,Address,balance,Currency,DOB,DOC) 
                              VALUES(@bankId,@accountId,@accountNo,@name,@gender,@mobileNo,@password,@address,@balance,@currency,@dob,@doc)";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
-            cmd.Parameters.AddWithValue("@bankId", BankId);
-            cmd.Parameters.AddWithValue("@accountId", AccountId);
-            cmd.Parameters.AddWithValue("@accountNo", AccountNumber);
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
+            cmd.Parameters.AddWithValue("@bankId", bankId);
+            cmd.Parameters.AddWithValue("@accountId", accountId);
+            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
             cmd.Parameters.AddWithValue("@name", name);
             cmd.Parameters.AddWithValue("@gender", gender.ToString());
             cmd.Parameters.AddWithValue("@mobileNo", mobileNumber);
@@ -37,205 +36,185 @@ namespace BankApp.Services
             cmd.Parameters.AddWithValue("@currency", "INR");
             cmd.Parameters.AddWithValue("@dob", dob);
             cmd.Parameters.AddWithValue("@doc", doc);
-            DatabaseService.ExecuteNonQueryAndCloseConnection(cmd);
-            return AccountNumber;
+            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            return accountNumber;
         }
-        public static string FetchClerkPassword(string id)
+        public  string FetchClerkPassword(string id)
         {
-            string Query = $"SELECT  password FROM Clerk WHERE ClerkId = @clerkid";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"SELECT  password FROM Clerk WHERE ClerkId = @clerkid";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@clerkid", id);
-            string Key = (string)DatabaseService.ExecuteScalarAndCloseConnection(cmd);
-            return Key;
+            return (string)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
         }
-        public static string GetBankId(string bankName)
+        public  string GetBankId(string bankName)
         {
-            string Query = $"SELECT BankId FROM Bank WHERE BankName = @bankName";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"SELECT bankId FROM Bank WHERE BankName = @bankName";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@bankName", bankName);
-            string Id = (string)DatabaseService.ExecuteScalarAndCloseConnection(cmd);
-            return Id;
+            return (string)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
         }
-        public static bool IsBankExist(string bankName)
+        public  bool IsBankExist(string bankName)
         {
-            string Id = null;
-            Id = GetBankId(bankName);
-            if (Id == null)
-                return false;
-            return true;
+            return GetBankId(bankName) != null;
         }
-        public static decimal FetchBankBalance(string bankId)
+        public  decimal FetchBankBalance(string bankId)
         {
-            string Query = $"SELECT balance FROM Bank WHERE BankId = @bankId";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"SELECT balance FROM Bank WHERE bankId = @bankId";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@bankId", bankId);
-            decimal Amount = (decimal)DatabaseService.ExecuteScalarAndCloseConnection(cmd);
-            return Amount;
+            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
         }
-        public static string GetAccountId(string bankName, string accountNumber)
+        public  string GetAccountId(string bankName, string accountNumber)
         {
-            string BankId = GetBankId(bankName);
-            string Query = $"SELECT  AccountId FROM Account WHERE Accountnumber = @accountNo and BankId =@bankId";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string bankId = GetBankId(bankName);
+            string query = $"SELECT  accountId FROM Account WHERE Accountnumber = @accountNo and bankId =@bankId";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            cmd.Parameters.AddWithValue("@bankId", BankId);
-            string Id = (string)DatabaseService.ExecuteScalarAndCloseConnection(cmd);
-            return Id;
+            cmd.Parameters.AddWithValue("@bankId", bankId);
+            return (string)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
         }
-        public static bool IsAccountExist(string bankName, string accountNumber)
+        public  bool IsAccountExist(string bankName, string accountNumber)
         {
-            string Id = null;
-
-            Id = GetAccountId(bankName, accountNumber);
-            if (Id == null)
-                return false;
-            return true;
+            return GetAccountId(bankName,accountNumber) != null;
         }
-        public static void UpdateBankBalance(string bankName, decimal balance)
+        public  void UpdateBankBalance(string bankName, decimal balance)
         {
-            string BankId = GetBankId(bankName);
-            string Query = $"UPDATE Account SET Balance = @balance WHERE BankId = @bankId";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string bankId = GetBankId(bankName);
+            string query = $"UPDATE Account SET balance = @balance WHERE bankId = @bankId";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@balance", balance);
-            cmd.Parameters.AddWithValue("@bankId", BankId);
-            DatabaseService.ExecuteNonQueryAndCloseConnection(cmd);
+            cmd.Parameters.AddWithValue("@bankId", bankId);
+            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
         }
-        public static void DeleteAccount(string bankName,string accountNumber)
+        public  void DeleteAccount(string bankName,string accountNumber)
         {
-            if (!ClerkService.IsAccountExist(bankName,accountNumber))
+            if (!IsAccountExist(bankName,accountNumber))
                 throw new Exception("Account does not exist");
-            string Query = $"DELETE FROM Account WHERE AccountNumber = @accountNo";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"DELETE FROM Account WHERE accountNumber = @accountNo";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            DatabaseService.ExecuteNonQueryAndCloseConnection(cmd);
+            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
         }
-        public static List<string> TransactionHistory(string bankName,string accountNumber)
+        public  List<string> TransactionHistory(string bankName,string accountNumber)
         {
-            List<string> History = new List<string>();
-            if (!ClerkService.IsAccountExist(bankName,accountNumber))
+            if (!IsAccountExist(bankName,accountNumber))
                 throw new Exception("Acount does not exist");
-            History = FetchAccountTransactions(accountNumber);
-            return History;
+            return FetchAccountTransactions(accountNumber);
         }
-        public static void UpdateServiceCharges(string bankName,decimal chargeOfIMPSForSame,decimal chargeOfRTGSForSame, decimal chargeOfIMPSForOther, decimal chargeOfRTGSForOther)
+        public  void UpdateServiceCharges(string bankName,decimal chargeOfIMPSForSame,decimal chargeOfRTGSForSame, decimal chargeOfIMPSForOther, decimal chargeOfRTGSForOther)
         {
-            string BankId = ClerkService.GetBankId(bankName);
-            string Query = @"UPDATE Bank SET IMPSsame=@impsSame,IMPSother=@impsOther,RTGSsame=@rtgsSame,RTGSother=@rtgsOther 
-                              WHERE BankId = @bankId";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string bankId = GetBankId(bankName);
+            string query = @"UPDATE Bank SET IMPSsame=@impsSame,IMPSother=@impsOther,RTGSsame=@rtgsSame,RTGSother=@rtgsOther 
+                              WHERE bankId = @bankId";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@impsSame", chargeOfIMPSForSame);
             cmd.Parameters.AddWithValue("@impsOther", chargeOfIMPSForOther);
             cmd.Parameters.AddWithValue("@rtgsSame", chargeOfRTGSForSame);
             cmd.Parameters.AddWithValue("@rtgsOther", chargeOfRTGSForOther);
-            cmd.Parameters.AddWithValue("@bankId", BankId);
-            DatabaseService.ExecuteNonQueryAndCloseConnection(cmd);
+            cmd.Parameters.AddWithValue("@bankId", bankId);
+            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
         }      
-        public static void RevertTransaction(string bankName,string accountNumber, string transactionId)
+        public  void RevertTransaction(string bankName,string accountNumber, string transactionId)
         {
-            if (!ClerkService.IsAccountExist(bankName,accountNumber))
+            if (!IsAccountExist(bankName,accountNumber))
                 throw new Exception("Account does not exist");
-            string Query = $"DELETE FROM Transaction WHERE TransationId = @transactionId";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"DELETE FROM Transaction WHERE TransationId = @transactionId";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@transactionId", transactionId);
-            DatabaseService.ExecuteNonQueryAndCloseConnection(cmd);
+            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
 
         }
-        public static void UpdateCurrency(string bankName,string accountNumber,Enums.CurrencyType currency)
+        public  void UpdateCurrency(string bankName,string accountNumber,Enums.CurrencyType currency)
         {
-            if (!ClerkService.IsAccountExist(bankName, accountNumber))
+            if (!IsAccountExist(bankName, accountNumber))
                 throw new Exception("Account does not exist");
-            string CurrencyType = CustomerService.GetAccountCurrencyType(accountNumber);
+            string CurrencyType = new CustomerService().GetAccountCurrencyType(accountNumber);
             if (CurrencyType == currency.ToString())
                 throw new Exception("New Currency is same as Existing!");
-            decimal ConversionRatio = 1;
+            decimal conversionRatio = 1;
             if (currency == Enums.CurrencyType.INUSD)
-                ConversionRatio = 1 / 70;
+                conversionRatio = 1 / 70;
             else if (Enums.CurrencyType.INR == currency)
-                ConversionRatio = 70;
-            decimal Balance = FetchAccountBalance(accountNumber);
-            Balance *= ConversionRatio;
-            string Query = $"UPDATE Account SET Currency=@currency,Balance=@balance WHERE AccountNumber = @accountNo";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+                conversionRatio = 70;
+            decimal balance = FetchAccountBalance(accountNumber);
+            balance *= conversionRatio;
+            string query = $"UPDATE Account SET Currency=@currency,balance=@balance WHERE accountNumber = @accountNo";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@currency", currency);
-            cmd.Parameters.AddWithValue("@balance", Balance);
+            cmd.Parameters.AddWithValue("@balance", balance);
             cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            DatabaseService.ExecuteNonQueryAndCloseConnection(cmd);
+            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
         }
-        public static decimal FetchAccountBalance(string accountNumber)
+        public  decimal FetchAccountBalance(string accountNumber)
         {
-            string Query = $"SELECT balance FROM Account WHERE AccountNumber = @accountNo";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"SELECT balance FROM Account WHERE accountNumber = @accountNo";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            decimal Amount = (decimal)DatabaseService.ExecuteScalarAndCloseConnection(cmd);
-            return Amount;
+            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
         }
-        public static List<string> FetchAccountTransactions(string accountNumber)
+        public  List<string> FetchAccountTransactions(string accountNumber)
         {
-            List<string> Transactions = new List<string>();
-            string Query = $"SELECT * FROM Transaction WHERE AccountNumber = @accountNo";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            List<string> transactions = new List<string>();
+            string query = $"SELECT * FROM Transaction WHERE accountNumber = @accountNo";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            DataTable dt = DatabaseService.ExecuteDataAdapterAndCloseConnection(cmd);
+            DataTable dt = new DatabaseService().ExecuteDataAdapterAndCloseConnection(cmd);
             string transaction;
             foreach (DataRow TXN in dt.Rows)
             { 
-                transaction  = $"{TXN["TransactionId"]} {TXN["SenderAccountId"]} {TXN["ReceiverAccountId"]} {TXN["TransactionType"]} {TXN["Amount"]} {TXN["TransactionTime"]} {TXN["Avl_Bal"]}";
-                Transactions.Add(transaction);
+                transaction  = $"{TXN["transactionId"]} {TXN["senderAccountId"]} {TXN["ReceiverAccountId"]} {TXN["TransactionType"]} {TXN["Amount"]} {TXN["TransactionTime"]} {TXN["Avl_Bal"]}";
+                transactions.Add(transaction);
             }
-            return Transactions;
+            return transactions;
         }
-        public static void UpdateAddress(string bankName,string accountNumber,string address)
+        public  void UpdateAddress(string bankName,string accountNumber,string address)
         {
-            if (!ClerkService.IsAccountExist(bankName, accountNumber))
+            if (!this.IsAccountExist(bankName, accountNumber))
                 throw new Exception("Account does not exist");
-            string Query = $"UPDATE Account SET Address=@address WHERE AccountNumber = @accountNo";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"UPDATE Account SET Address=@address WHERE accountNumber = @accountNo";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@address", address);
             cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            DatabaseService.ExecuteNonQueryAndCloseConnection(cmd);
+            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
         }
-        public static void UpdateMobileNumber(string bankName,string accountNumber,string mobileNumber)
+        public  void UpdateMobileNumber(string bankName,string accountNumber,string mobileNumber)
 
         {
-            if (!ClerkService.IsAccountExist(bankName, accountNumber))
+            if (!IsAccountExist(bankName, accountNumber))
                 throw new Exception("Account does not exist");
-            string Query = $"UPDATE Account SET MobileNumber = @mobileNo WHERE AccountNumber = @accountNo";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"UPDATE Account SET MobileNumber = @mobileNo WHERE accountNumber = @accountNo";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@mobileNo", mobileNumber);
             cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            DatabaseService.ExecuteNonQueryAndCloseConnection(cmd);
+            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
         }
-        public static decimal GetImpsChargesForSameBank(string bankId)
+        public  decimal GetImpsChargesForSameBank(string bankId)
         {
-            string Query = $"SELECT IMPSsame FROM Bank WHERE BankId = @bankId";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"SELECT IMPSsame FROM Bank WHERE bankId = @bankId";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@bankId", bankId);
-            decimal charge = (decimal)DatabaseService.ExecuteScalarAndCloseConnection(cmd);
-            return charge;
+            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
         }
-        public static decimal GetImpsChargesForOtherBank(string bankId)
+        public  decimal GetImpsChargesForOtherBank(string bankId)
         {
-            string Query = $"SELECT IMPSother FROM Bank WHERE BankId = @bankId";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"SELECT IMPSother FROM Bank WHERE bankId = @bankId";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@bankId", bankId);
-            decimal charge = (decimal)DatabaseService.ExecuteScalarAndCloseConnection(cmd);
-            return charge;
+            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
         }
-        public static decimal GetRtgsChargesForSameBank(string bankId)
+        public  decimal GetRtgsChargesForSameBank(string bankId)
         {
-            string Query = $"SELECT RTGSsame FROM Bank WHERE BankId = @bankId";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"SELECT RTGSsame FROM Bank WHERE bankId = @bankId";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@bankId", bankId);
-            decimal charge = (decimal)DatabaseService.ExecuteScalarAndCloseConnection(cmd);
-            return charge;
+            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
         }
-        public static decimal GetRtgsChargesForOtherBank(string bankId)
+        public  decimal GetRtgsChargesForOtherBank(string bankId)
         {
-            string Query = $"SELECT RTGSother FROM Bank WHERE BankId = @bankId";
-            var cmd = DatabaseService.OpenConnectionAndCreateCommand(Query);
+            string query = $"SELECT RTGSother FROM Bank WHERE bankId = @bankId";
+            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
             cmd.Parameters.AddWithValue("@bankId", bankId);
-            decimal charge = (decimal)DatabaseService.ExecuteScalarAndCloseConnection(cmd);
-            return charge;
+            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
         }
     }
     

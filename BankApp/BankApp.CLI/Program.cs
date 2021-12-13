@@ -10,90 +10,91 @@ namespace BankApp.CLI
         
         static void Main(string[] args)
         {
-            string BankName,Message,AccountNumber,Password;
+            string bankName,message,accountNumber,password;
             Enums.Action Action;
             while (true)
             {
-                Message = "\n1.New Bank Setup\n2.Login\nEnter Operation No : ";
-                Action = IOMethods.GetEnum<Enums.Action>(Message);
+                message = "\n1.New Bank Setup\n2.Login\nEnter Operation No : ";
+                Action = IOMethods.GetEnum<Enums.Action>(message);
                 try {
                     switch (Action)
                     {
                         case Enums.Action.NEWBANK:                        
-                            BankName = IOMethods.GetName("Bank Name To Setup : ");
+                            bankName = IOMethods.GetName("Bank name To Setup : ");
                             /*IOMethods.DisplayOutputLine("Atleast one clerk should be added to maintain the bank");*/
-                            string ClerkName = IOMethods.GetName("Add Clerk Name : ");
-                            Password = IOMethods.GetString("Set Password : ");
-                            string dob = IOMethods.GetDOB("Enter Date Of Birth(DD-MM-YYYY) : ");
+                            string ClerkName = IOMethods.GetName("Add Clerk name : ");
+                            password = IOMethods.GetString("Set password : ");
+                            string dob = IOMethods.GetDOB("Enter date Of Birth(DD-MM-YYYY) : ");
                             decimal salary = IOMethods.GetDecimal("Enter Salary(INR) : ");
-                            string Address = IOMethods.GetAddress();
-                            string MobileNumber = IOMethods.GetMobileNumber("Enter Mobile No : ");
-                            string Id = CustomerService.AddBank(BankName,ClerkName,dob,Address,Password,MobileNumber,salary);
-                            IOMethods.DisplayOutputLine($"{BankName} is eshtablished, Remember! clerk Id : {Id}");
+                            string address = IOMethods.GetAddress();
+                            string mobileNumber = IOMethods.GetMobileNumber("Enter Mobile No : ");
+                            string Id = new CustomerService().AddBank(bankName,ClerkName,dob,address,password,mobileNumber,salary);
+                            IOMethods.DisplayOutputLine($"{bankName} is eshtablished, Remember! clerk Id : {Id}");
                             break;
 
                         case Enums.Action.LOGIN:                        
-                            BankName = IOMethods.GetName("Enter Bank Name : ");
-                            if (!ClerkService.IsBankExist(BankName))
+                            bankName = IOMethods.GetName("Enter Bank name : ");
+                            if (!new ClerkService().IsBankExist(bankName))
                             {
                                 IOMethods.DisplayOutputLine("No such Bank exist!");
                                 break;
                             }
                             bool LoginFlag = true;
-                            Enums.Login Login;
+                            Enums.Login login;
                             while (LoginFlag)
                             {
-                                Message = "As:\n1.AccountHolder\n2.Bankstaff\n3.Exit\nEnter Operation No : ";                                
-                                Login = IOMethods.GetEnum<Enums.Login>(Message);
+                                message = "As:\n1.AccountHolder\n2.Bankstaff\n3.Exit\nEnter Operation No : ";                                
+                                login = IOMethods.GetEnum<Enums.Login>(message);
                                 try
                                 {
-                                    switch (Login)
+                                    switch (login)
                                     {
                                         case Enums.Login.ACCOUNTHOLDER:
                                             Enums.CustomerOperation CustOp;
-                                            decimal Amount;
-                                            bool CustomerFlag = true;
-                                            AccountNumber = IOMethods.GetString("Account Number : ");
-                                            while (CustomerFlag)
+                                            decimal amount;
+                                            bool customerFlag = true;
+                                            accountNumber = IOMethods.GetString("Account Number : ");
+                                            CustomerService customer = new CustomerService();
+                                            while (customerFlag)
                                             {
-                                                Message = "\n1.Deposit\n2.Withdraw\n3.Transfer\n4.Transaction History\n5.Exit\nEnter Operation No : ";
-                                                CustOp = IOMethods.GetEnum<Enums.CustomerOperation>(Message);
+                                                message = "\n1.Deposit\n2.Withdraw\n3.Transfer\n4.Transaction history\n5.Exit\nEnter Operation No : ";
+                                                CustOp = IOMethods.GetEnum<Enums.CustomerOperation>(message);
                                                 try
                                                 {
                                                     switch (CustOp)
                                                     {
                                                         case Enums.CustomerOperation.DEPOSIT:
-                                                            Amount = IOMethods.GetDecimal($"Enter Amount ({CustomerService.GetAccountCurrencyType(AccountNumber)}) : ");
-                                                            CustomerService.Deposit(BankName, AccountNumber, Amount);
+                                                            amount = IOMethods.GetDecimal($"Enter amount ({customer.GetAccountCurrencyType(accountNumber)}) : ");
+                                                            customer.Deposit(bankName, accountNumber, amount);
                                                             IOMethods.DisplayOutputLine("Successfully! Deposited your amount");
                                                             break;
 
                                                         case Enums.CustomerOperation.WITHDRAW:
-                                                            Amount = IOMethods.GetDecimal($"Enter Amount ({CustomerService.GetAccountCurrencyType(AccountNumber)}) : ");
-                                                            Password = IOMethods.GetString("Account Password : ");
-                                                            CustomerService.Withdraw(BankName, AccountNumber, Amount, Password);
+                                                            amount = IOMethods.GetDecimal($"Enter amount ({customer.GetAccountCurrencyType(accountNumber)}) : ");
+                                                            password = IOMethods.GetString("Account password : ");
+                                                            customer.Withdraw(bankName, accountNumber, amount, password);
                                                             IOMethods.DisplayOutputLine("Successfully! withdrawed your amount");
                                                             break;
 
                                                         case Enums.CustomerOperation.TRANSFER:
-                                                            Amount = IOMethods.GetDecimal($"Enter Amount ({CustomerService.GetAccountCurrencyType(AccountNumber)}) : ");
-                                                            string ReceiverBankName = IOMethods.GetName("Reciever Bank Name : ");
+                                                            amount = IOMethods.GetDecimal($"Enter amount ({customer.GetAccountCurrencyType(accountNumber)}) : ");
+                                                            string ReceiverBankName = IOMethods.GetName("Reciever Bank name : ");
                                                             string ReceiverAccountNumber = IOMethods.GetName("Receiver Account Number : ");
                                                             Enums.TypeOfTransfer TypeOfTransfer = IOMethods.GetEnum<Enums.TypeOfTransfer>("Type of Transfer (IMPS/RTGS) : ");
-                                                            Password = IOMethods.GetString("Account Password : ");
-                                                            CustomerService.Transfer(BankName, AccountNumber, ReceiverBankName, ReceiverAccountNumber, Amount, Password, TypeOfTransfer);
+                                                            password = IOMethods.GetString("Account password : ");
+                                                            customer.Transfer(bankName, accountNumber, ReceiverBankName, ReceiverAccountNumber, amount, password, TypeOfTransfer);
                                                             IOMethods.DisplayOutputLine("Successfully! Transfered your amount");
                                                             break;
 
                                                         case Enums.CustomerOperation.TRANSACTIONHISTORY:
-                                                            Password = IOMethods.GetString("Account Password : ");
-                                                            List<string> History;
-                                                            History = CustomerService.TransactionHistory(BankName, AccountNumber, Password);
-                                                            IOMethods.DisplayOutput(History);
+                                                            password = IOMethods.GetString("Account password : ");
+                                                            List<string> history;
+                                                            history = customer.TransactionHistory(bankName, accountNumber, password);
+                                                            IOMethods.DisplayOutput(history);
                                                             break;
 
                                                         case Enums.CustomerOperation.EXIT:
-                                                            CustomerFlag = false;
+                                                            customerFlag = false;
                                                             break;
                                                         default:
                                                             IOMethods.DisplayOutputLine("Wrong input!");
@@ -109,52 +110,52 @@ namespace BankApp.CLI
 
                                         case Enums.Login.BANKSTAFF:
                                             Id = IOMethods.GetLowerCase("Clerk ID : ");
-                                            Password = IOMethods.GetString("Password : ");
-                                            if (Password!=ClerkService.FetchClerkPassword(Id) || Password=="")
+                                            password = IOMethods.GetString("password : ");
+                                            ClerkService clerk = new ClerkService();
+                                            if (password!=clerk.FetchClerkPassword(Id) || password=="")
                                             {
-                                                IOMethods.DisplayOutputLine("Invalid Id or Password");
+                                                IOMethods.DisplayOutputLine("Invalid Id or password");
                                                 break;
                                             }
                                             
-                                            string Name;
-                                            Enums.Gender Gender;
-                                            bool ClerkFlag = true;
-                                            string address;
+                                            string name;
+                                            Enums.Gender gender;
+                                            bool clerkFlag = true;
                                             Enums.ClerkOperation ClerkOp;
-                                            while (ClerkFlag)
+                                            while (clerkFlag)
                                             {
-                                                Message = "\n1.Create Account\n2.Update Account\n3.Delete Account\n4.Transaction History\n5.Revert Transaction\n6.Update Charges\n7.Update Currency\n8.Logout\nEnter Operation No : ";
-                                                ClerkOp = IOMethods.GetEnum<Enums.ClerkOperation>(Message);
+                                                message = "\n1.Create Account\n2.Update Account\n3.Delete Account\n4.Transaction history\n5.Revert Transaction\n6.Update Charges\n7.Update Currency\n8.Logout\nEnter Operation No : ";
+                                                ClerkOp = IOMethods.GetEnum<Enums.ClerkOperation>(message);
                                                 try
                                                 {
                                                     switch (ClerkOp)
                                                     {
                                                         case Enums.ClerkOperation.CREATEACCOUNT:
-                                                            Name = IOMethods.GetString("Name : ");
-                                                            MobileNumber = IOMethods.GetMobileNumber("Mobile No : ");
-                                                            Gender = IOMethods.GetEnum<Enums.Gender>("Gender (M/F/O) : ");
+                                                            name = IOMethods.GetString("name : ");
+                                                            mobileNumber = IOMethods.GetMobileNumber("Mobile No : ");
+                                                            gender = IOMethods.GetEnum<Enums.Gender>("gender (M/F/O) : ");
                                                             address = IOMethods.GetAddress();
-                                                            Password = IOMethods.GetString("set Account Password : ");
-                                                            dob = IOMethods.GetDOB("Enter Date of Birth(DD-MM-YYYY) : ");
-                                                            AccountNumber = ClerkService.CreateAccount(BankName,Name, MobileNumber, Gender, address,dob, Password);
-                                                            IOMethods.DisplayOutputLine($"Account is created, Account Number is : {AccountNumber}");
+                                                            password = IOMethods.GetString("set Account password : ");
+                                                            dob = IOMethods.GetDOB("Enter date of Birth(DD-MM-YYYY) : ");
+                                                            accountNumber = clerk.CreateAccount(bankName,name, mobileNumber, gender, address,dob, password);
+                                                            IOMethods.DisplayOutputLine($"Account is created, Account Number is : {accountNumber}");
                                                             break;
 
                                                         case Enums.ClerkOperation.UPDATEACCOUNT:
-                                                            Message = "\n1.Address\n2.Mobile Number\nEnter Operarion No : ";
-                                                            Enums.UpdateAccount update = IOMethods.GetEnum<Enums.UpdateAccount>(Message);
+                                                            message = "\n1.Address\n2.Mobile Number\nEnter Operarion No : ";
+                                                            Enums.UpdateAccount update = IOMethods.GetEnum<Enums.UpdateAccount>(message);
                                                             switch (update)
                                                             {
                                                                 case Enums.UpdateAccount.ADDRESS:
-                                                                    AccountNumber = IOMethods.GetString("Account Number : ");
+                                                                    accountNumber = IOMethods.GetString("Account Number : ");
                                                                     address = IOMethods.GetAddress();
-                                                                    ClerkService.UpdateAddress(BankName,AccountNumber, address);
+                                                                    clerk.UpdateAddress(bankName,accountNumber, address);
                                                                     IOMethods.DisplayOutputLine("Successfully! updated the address");
                                                                     break;
                                                                 case Enums.UpdateAccount.MOBILENUMBER:
-                                                                    AccountNumber = IOMethods.GetString("Account Number : ");
-                                                                    MobileNumber = IOMethods.GetMobileNumber("New Mobile Number : ");
-                                                                    ClerkService.UpdateMobileNumber(BankName,AccountNumber,MobileNumber);
+                                                                    accountNumber = IOMethods.GetString("Account Number : ");
+                                                                    mobileNumber = IOMethods.GetMobileNumber("New Mobile Number : ");
+                                                                    clerk.UpdateMobileNumber(bankName,accountNumber,mobileNumber);
                                                                     IOMethods.DisplayOutputLine("Successfully! Updated the mobile number");
                                                                     break;
                                                                 default:
@@ -164,22 +165,22 @@ namespace BankApp.CLI
                                                             break;
 
                                                         case Enums.ClerkOperation.DELETEACCOUNT:
-                                                            AccountNumber = IOMethods.GetString("Account Number : ");
-                                                            ClerkService.DeleteAccount(BankName,AccountNumber);
+                                                            accountNumber = IOMethods.GetString("Account Number : ");
+                                                            clerk.DeleteAccount(bankName,accountNumber);
                                                             IOMethods.DisplayOutputLine("Successfully! Deleted the account");
                                                             break;
 
                                                         case Enums.ClerkOperation.TRANSACTIONHISTORY:
-                                                            AccountNumber = IOMethods.GetString("Account Number : ");
-                                                            List<string> History;
-                                                            History = ClerkService.TransactionHistory(BankName,AccountNumber);
-                                                            IOMethods.DisplayOutput(History);
+                                                            accountNumber = IOMethods.GetString("Account Number : ");
+                                                            List<string> history;
+                                                            history = clerk.TransactionHistory(bankName,accountNumber);
+                                                            IOMethods.DisplayOutput(history);
                                                             break;
 
                                                         case Enums.ClerkOperation.REVERTTRANSACTION:
-                                                            AccountNumber = IOMethods.GetString("Account Number : ");
-                                                            string TransactionId = IOMethods.GetString("Account Number : ");
-                                                            ClerkService.RevertTransaction(BankName,AccountNumber, TransactionId);
+                                                            accountNumber = IOMethods.GetString("Account Number : ");
+                                                            string transactionId = IOMethods.GetString("Account Number : ");
+                                                            clerk.RevertTransaction(bankName,accountNumber, transactionId);
                                                             IOMethods.DisplayOutputLine("Successfully! Reverted the transaction");
                                                             break;
 
@@ -189,20 +190,20 @@ namespace BankApp.CLI
                                                             ImpsDiff = IOMethods.GetDecimal("New IMPS Charges for Diff Bank : ");
                                                             RtgsSame = IOMethods.GetDecimal("New RTGS Charges for Same Bank : ");
                                                             RtgsDiff = IOMethods.GetDecimal("New RTGS Charges for Same Bank : ");
-                                                            ClerkService.UpdateServiceCharges(BankName,ImpsSame, RtgsSame, ImpsDiff, RtgsDiff);
+                                                            clerk.UpdateServiceCharges(bankName,ImpsSame, RtgsSame, ImpsDiff, RtgsDiff);
                                                             IOMethods.DisplayOutputLine("Successfully! Updates the charges");
                                                             break;
 
                                                         case Enums.ClerkOperation.UPDATECURRENCY:
-                                                            AccountNumber = IOMethods.GetString("Account Number : ");
+                                                            accountNumber = IOMethods.GetString("Account Number : ");
                                                             Enums.CurrencyType currency = IOMethods.GetEnum<Enums.CurrencyType>("New Currency (INR/INUSD) : ");
-                                                            ClerkService.UpdateCurrency(BankName,AccountNumber,currency);
+                                                            clerk.UpdateCurrency(bankName,accountNumber,currency);
                                                             IOMethods.DisplayOutputLine("Successfully! Updated the Currency");
                                                             break;
 
                                                         case Enums.ClerkOperation.LOGOUT:
                                                             IOMethods.DisplayOutputLine("Logged out!");
-                                                            ClerkFlag = false;
+                                                            clerkFlag = false;
                                                             break;
 
                                                         default:
