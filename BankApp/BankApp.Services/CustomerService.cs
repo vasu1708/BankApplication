@@ -1,4 +1,5 @@
 ﻿using BankApp.Models;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 namespace BankApp.Services
@@ -16,16 +17,16 @@ namespace BankApp.Services
             decimal IMPSChargesSame = 2;
             decimal IMPSChargesOther = 6;
             string query = $"INSERT INTO Bank VALUES(@bankName,@bankId,@estdDate,@balance,@impsSame,@impsOther,@rtgsSame,@rtgsOther)";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@bankName", bankName);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            cmd.Parameters.AddWithValue("@estdDate", date);
-            cmd.Parameters.AddWithValue("@balance", 0);
-            cmd.Parameters.AddWithValue("@impsSame", IMPSChargesSame);
-            cmd.Parameters.AddWithValue("@impsOther", IMPSChargesOther);
-            cmd.Parameters.AddWithValue("@rtgsSame", RTGSChargesSame);
-            cmd.Parameters.AddWithValue("@rtgsOther", RTGSChargesOther);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@bankName", bankName));
+            parameterList.Add(new MySqlParameter("@bankId", bankId));
+            parameterList.Add(new MySqlParameter("@estdDate", date));
+            parameterList.Add(new MySqlParameter("@balance", 0));
+            parameterList.Add(new MySqlParameter("@impsSame", IMPSChargesSame));
+            parameterList.Add(new MySqlParameter("@impsOther", IMPSChargesOther));
+            parameterList.Add(new MySqlParameter("@rtgsSame", RTGSChargesSame));
+            parameterList.Add(new MySqlParameter("@rtgsOther", RTGSChargesOther));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
             string clerkId = $"{clerkName}@{bankName.Replace(" ","").ToLower()}";
             string doj = date;
             AddClerk(bankId, clerkName, clerkId,password,dob,address,mobileNumber,salary,doj);
@@ -35,17 +36,17 @@ namespace BankApp.Services
         {
             string query = @"INSERT INTO Clerk(clerkName,ClerkId,bankId,Password,DOB,DOJ,Address,MobileNumber,Salary) 
                              VALUES(@clerkName,@clerkId,@bankId,@password,@dob,@doj,@address,@mobileNo,@salary)";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@clerkName", clerkName);
-            cmd.Parameters.AddWithValue("@clerkId", clerkId);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            cmd.Parameters.AddWithValue("@password", password);
-            cmd.Parameters.AddWithValue("@dob", dob);
-            cmd.Parameters.AddWithValue("@doj", doj);
-            cmd.Parameters.AddWithValue("@address", address);
-            cmd.Parameters.AddWithValue("mobileNo", mobileNumber);
-            cmd.Parameters.AddWithValue("@salary", salary);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@clerkName", clerkName));
+            parameterList.Add(new MySqlParameter("@clerkId", clerkId));
+            parameterList.Add(new MySqlParameter("@bankId", bankId));
+            parameterList.Add(new MySqlParameter("@password", password));
+            parameterList.Add(new MySqlParameter("@dob", dob));
+            parameterList.Add(new MySqlParameter("@doj", doj));
+            parameterList.Add(new MySqlParameter("@address", address));
+            parameterList.Add(new MySqlParameter("mobileNo", mobileNumber));
+            parameterList.Add(new MySqlParameter("@salary", salary));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
         }
         public void Deposit(string bankName,string accountNumber,decimal amount)
         {
@@ -65,9 +66,9 @@ namespace BankApp.Services
         public decimal FetchAccountBalance(string accountNumber)
         {
             string query = $"SELECT balance FROM Account WHERE accountNumber = @accountNo";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            return (decimal)new DatabaseService().ExecuteScalar(query,parameterList);
         }
         public void Withdraw(string bankName,string accountNumber,decimal amount,string password)
         {
@@ -114,16 +115,16 @@ namespace BankApp.Services
             if (senderBankName == receiverBankName)
             {
                 if(typeOfTransfer == Enums.TypeOfTransfer.IMPS)
-                    Charges = new ClerkService().GetImpsChargesForSameBank(senderBankId) * amount / 100;
+                    Charges = new ClerkService().GetCharges(senderBankId,"impsSame") * amount / 100;
                 else
-                    Charges = new ClerkService().GetRtgsChargesForSameBank(senderBankId) * amount / 100;
+                    Charges = new ClerkService().GetCharges(senderBankId,"rtgsSame") * amount / 100;
             }
             else
             {
                 if(typeOfTransfer== Enums.TypeOfTransfer.IMPS)
-                    Charges = new ClerkService().GetImpsChargesForOtherBank(senderBankId) * amount / 100;
+                    Charges = new ClerkService().GetCharges(senderBankId,"impsOther") * amount / 100;
                 else
-                    Charges = new ClerkService().GetRtgsChargesForOtherBank(senderBankId) * amount / 100;
+                    Charges = new ClerkService().GetCharges(senderBankId,"rtgsOther") * amount / 100;
                 
             }
             amount -= Charges;
@@ -137,9 +138,9 @@ namespace BankApp.Services
         public  string GetAccountCurrencyType(string accountNumber)
         {
             string query = $"SELECT Currency FROM Account WHERE accountNumber = @accountNo";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            return (string)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            return (string)new DatabaseService().ExecuteScalar(query,parameterList);
         }
         public void InsertTransaction(string bankId, string accountNumber, string transactionId, string senderAccountId, string receiverAccountId, string typeOfTransaction, decimal amount, DateTime pointOfTime)
         {
@@ -147,40 +148,41 @@ namespace BankApp.Services
                               VALUES(@bankId,@accountNo,@txnId,@senderAccId,@receiverAccId,@txnType,@amount,@time,@balance)";
             decimal bal = FetchAccountBalance(accountNumber);
             string balance = $"{bal.ToString()}({GetAccountCurrencyType(accountNumber)})";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            cmd.Parameters.AddWithValue("@txnId", transactionId);
-            cmd.Parameters.AddWithValue("@senderAccId", senderAccountId);
-            cmd.Parameters.AddWithValue("@receiverAccId", receiverAccountId);
-            cmd.Parameters.AddWithValue("@txnType", typeOfTransaction);
-            cmd.Parameters.AddWithValue("@amount", amount);
-            cmd.Parameters.AddWithValue("@time", pointOfTime);
-            cmd.Parameters.AddWithValue("@balance", balance);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@bankId", bankId));
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            parameterList.Add(new MySqlParameter("@txnId", transactionId));
+            parameterList.Add(new MySqlParameter("@senderAccId", senderAccountId));
+            parameterList.Add(new MySqlParameter("@receiverAccId", receiverAccountId));
+            parameterList.Add(new MySqlParameter("@txnType", typeOfTransaction));
+            parameterList.Add(new MySqlParameter("@amount", amount));
+            parameterList.Add(new MySqlParameter("@time", pointOfTime));
+            parameterList.Add(new MySqlParameter("@balance", balance));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
         }
         public void UpdateAccountBalance(string accountNumber, decimal balance)
         {
             string query = $"UPDATE Account SET balance = @balance WHERE accountNumber = @accountNo";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@balance", balance);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@balance", balance));
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
         }
         public List<string> TransactionHistory(string bankName,string accountNumber,string password)
         {
-            if (!new ClerkService().IsAccountExist(bankName,accountNumber))
+            var clerk = new ClerkService();
+            if (!clerk.IsAccountExist(bankName,accountNumber))
                 throw new Exception("Acount does not exist");
             if (FetchAccountPassword(accountNumber)!=password)
                 throw new Exception("Incorrect Password");
-            return new ClerkService().FetchAccountTransactions(accountNumber);
+            return clerk.FetchAccountTransactions(accountNumber);
         }
         public string FetchAccountPassword(string accountNumber)
         {
             string query = $"SELECT  password FROM Account WHERE accountNumber = @accountNo";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            return (string)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList = new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            return (string)new DatabaseService().ExecuteScalar(query,parameterList);
         }
     }
 }

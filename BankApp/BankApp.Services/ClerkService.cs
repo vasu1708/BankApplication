@@ -1,4 +1,5 @@
 ﻿using BankApp.Models;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -23,35 +24,35 @@ namespace BankApp.Services
             string bankId = GetBankId(bankName);
             string query = @"INSERT INTO Account(bankId,accountId,accountNumber,Name,Gender,MobileNumber,Password,Address,balance,Currency,DOB,DOC) 
                              VALUES(@bankId,@accountId,@accountNo,@name,@gender,@mobileNo,@password,@address,@balance,@currency,@dob,@doc)";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            cmd.Parameters.AddWithValue("@accountId", accountId);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            cmd.Parameters.AddWithValue("@name", name);
-            cmd.Parameters.AddWithValue("@gender", gender.ToString());
-            cmd.Parameters.AddWithValue("@mobileNo", mobileNumber);
-            cmd.Parameters.AddWithValue("@password", password);
-            cmd.Parameters.AddWithValue("@balance", 0);
-            cmd.Parameters.AddWithValue("@address",address);
-            cmd.Parameters.AddWithValue("@currency", "INR");
-            cmd.Parameters.AddWithValue("@dob", dob);
-            cmd.Parameters.AddWithValue("@doc", doc);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@bankId", bankId));
+            parameterList.Add(new MySqlParameter("@accountId", accountId));
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            parameterList.Add(new MySqlParameter("@name", name));
+            parameterList.Add(new MySqlParameter("@gender", gender.ToString()));
+            parameterList.Add(new MySqlParameter("@mobileNo", mobileNumber));
+            parameterList.Add(new MySqlParameter("@password", password));
+            parameterList.Add(new MySqlParameter("@balance", 0));
+            parameterList.Add(new MySqlParameter("@address",address));
+            parameterList.Add(new MySqlParameter("@currency", "INR"));
+            parameterList.Add(new MySqlParameter("@dob", dob));
+            parameterList.Add(new MySqlParameter("@doc", doc));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
             return accountNumber;
         }
         public  string FetchClerkPassword(string id)
         {
             string query = $"SELECT  password FROM Clerk WHERE ClerkId = @clerkid";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@clerkid", id);
-            return (string)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@clerkid", id));
+            return (string)new DatabaseService().ExecuteScalar(query,parameterList);
         }
         public  string GetBankId(string bankName)
         {
             string query = $"SELECT bankId FROM Bank WHERE BankName = @bankName";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@bankName", bankName);
-            return (string)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@bankName", bankName));
+            return (string)new DatabaseService().ExecuteScalar(query,parameterList);
         }
         public  bool IsBankExist(string bankName)
         {
@@ -60,18 +61,18 @@ namespace BankApp.Services
         public  decimal FetchBankBalance(string bankId)
         {
             string query = $"SELECT balance FROM Bank WHERE bankId = @bankId";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@bankId", bankId));
+            return (decimal)new DatabaseService().ExecuteScalar(query,parameterList);
         }
         public  string GetAccountId(string bankName, string accountNumber)
         {
             string bankId = GetBankId(bankName);
             string query = $"SELECT  accountId FROM Account WHERE Accountnumber = @accountNo and bankId =@bankId";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            return (string)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            parameterList.Add(new MySqlParameter("@bankId", bankId));
+            return (string)new DatabaseService().ExecuteScalar(query,parameterList);
         }
         public  bool IsAccountExist(string bankName, string accountNumber)
         {
@@ -81,19 +82,19 @@ namespace BankApp.Services
         {
             string bankId = GetBankId(bankName);
             string query = $"UPDATE Account SET balance = @balance WHERE bankId = @bankId";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@balance", balance);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@balance", balance));
+            parameterList.Add(new MySqlParameter("@bankId", bankId));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
         }
         public  void DeleteAccount(string bankName,string accountNumber)
         {
             if (!IsAccountExist(bankName,accountNumber))
                 throw new Exception("Account does not exist");
             string query = $"DELETE FROM Account WHERE accountNumber = @accountNo";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
         }
         public  List<string> TransactionHistory(string bankName,string accountNumber)
         {
@@ -106,22 +107,22 @@ namespace BankApp.Services
             string bankId = GetBankId(bankName);
             string query = @"UPDATE Bank SET IMPSsame=@impsSame,IMPSother=@impsOther,RTGSsame=@rtgsSame,RTGSother=@rtgsOther 
                               WHERE bankId = @bankId";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@impsSame", chargeOfIMPSForSame);
-            cmd.Parameters.AddWithValue("@impsOther", chargeOfIMPSForOther);
-            cmd.Parameters.AddWithValue("@rtgsSame", chargeOfRTGSForSame);
-            cmd.Parameters.AddWithValue("@rtgsOther", chargeOfRTGSForOther);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@impsSame", chargeOfIMPSForSame));
+            parameterList.Add(new MySqlParameter("@impsOther", chargeOfIMPSForOther));
+            parameterList.Add(new MySqlParameter("@rtgsSame", chargeOfRTGSForSame));
+            parameterList.Add(new MySqlParameter("@rtgsOther", chargeOfRTGSForOther));
+            parameterList.Add(new MySqlParameter("@bankId", bankId));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
         }      
         public  void RevertTransaction(string bankName,string accountNumber, string transactionId)
         {
             if (!IsAccountExist(bankName,accountNumber))
                 throw new Exception("Account does not exist");
             string query = $"DELETE FROM Transaction WHERE TransationId = @transactionId";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@transactionId", transactionId);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@transactionId", transactionId));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
 
         }
         public  void UpdateCurrency(string bankName,string accountNumber,Enums.CurrencyType currency)
@@ -139,26 +140,26 @@ namespace BankApp.Services
             decimal balance = FetchAccountBalance(accountNumber);
             balance *= conversionRatio;
             string query = $"UPDATE Account SET Currency=@currency,balance=@balance WHERE accountNumber = @accountNo";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@currency", currency);
-            cmd.Parameters.AddWithValue("@balance", balance);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@currency", currency));
+            parameterList.Add(new MySqlParameter("@balance", balance));
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
         }
         public  decimal FetchAccountBalance(string accountNumber)
         {
             string query = $"SELECT balance FROM Account WHERE accountNumber = @accountNo";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            return (decimal)new DatabaseService().ExecuteScalar(query,parameterList);
         }
         public  List<string> FetchAccountTransactions(string accountNumber)
         {
             List<string> transactions = new List<string>();
             string query = $"SELECT * FROM Transaction WHERE accountNumber = @accountNo";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            DataTable dt = new DatabaseService().ExecuteDataAdapterAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            DataTable dt = new DatabaseService().ExecuteDataAdapter(query,parameterList);
             string transaction;
             foreach (DataRow TXN in dt.Rows)
             { 
@@ -172,10 +173,10 @@ namespace BankApp.Services
             if (!this.IsAccountExist(bankName, accountNumber))
                 throw new Exception("Account does not exist");
             string query = $"UPDATE Account SET Address=@address WHERE accountNumber = @accountNo";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@address", address);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@address", address));
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
         }
         public  void UpdateMobileNumber(string bankName,string accountNumber,string mobileNumber)
 
@@ -183,38 +184,17 @@ namespace BankApp.Services
             if (!IsAccountExist(bankName, accountNumber))
                 throw new Exception("Account does not exist");
             string query = $"UPDATE Account SET MobileNumber = @mobileNo WHERE accountNumber = @accountNo";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@mobileNo", mobileNumber);
-            cmd.Parameters.AddWithValue("@accountNo", accountNumber);
-            new DatabaseService().ExecuteNonQueryAndCloseConnection(cmd);
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@mobileNo", mobileNumber));
+            parameterList.Add(new MySqlParameter("@accountNo", accountNumber));
+            new DatabaseService().ExecuteNonQuery(query,parameterList);
         }
-        public  decimal GetImpsChargesForSameBank(string bankId)
+        public  decimal GetCharges(string bankId,string chargeType)
         {
-            string query = $"SELECT IMPSsame FROM Bank WHERE bankId = @bankId";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
-        }
-        public  decimal GetImpsChargesForOtherBank(string bankId)
-        {
-            string query = $"SELECT IMPSother FROM Bank WHERE bankId = @bankId";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
-        }
-        public  decimal GetRtgsChargesForSameBank(string bankId)
-        {
-            string query = $"SELECT RTGSsame FROM Bank WHERE bankId = @bankId";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
-        }
-        public  decimal GetRtgsChargesForOtherBank(string bankId)
-        {
-            string query = $"SELECT RTGSother FROM Bank WHERE bankId = @bankId";
-            var cmd = new DatabaseService().OpenConnectionAndCreateCommand(query);
-            cmd.Parameters.AddWithValue("@bankId", bankId);
-            return (decimal)new DatabaseService().ExecuteScalarAndCloseConnection(cmd);
+            string query = $"SELECT {chargeType} FROM Bank WHERE bankId = @bankId";
+            List<MySqlParameter> parameterList= new List<MySqlParameter>();
+            parameterList.Add(new MySqlParameter("@bankId", bankId));
+            return (decimal)new DatabaseService().ExecuteScalar(query,parameterList);
         }
     }
     

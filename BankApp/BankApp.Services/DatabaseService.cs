@@ -8,31 +8,29 @@ namespace BankApp.Services
     public class DatabaseService
     {
         private  MySqlConnection Connection { get; set; }
-        public  void OpenConnection(string serverName, string databaseName, string userId, string password)
+        public  MySqlCommand OpenConnectionAndCreateCommand(string query,List<MySqlParameter> parameterList)
         {
-            string ConnectionString = $"SERVER={serverName};DATABASE={databaseName};UID={userId};PASSWORD={password}";
+            string ConnectionString = $"SERVER={"localhost"};DATABASE={"BankDB"};UID={"srinivas"};PASSWORD={"Mysql@1234"}";
             Connection = new MySqlConnection(ConnectionString);
             Connection.Open();
+            var cmd = new MySqlCommand(query, Connection);
+            cmd.Parameters.AddRange(parameterList.ToArray());
+            return cmd;
         }
-        public  MySqlCommand OpenConnectionAndCreateCommand(string query)
+        public  Object ExecuteScalar(string query,List<MySqlParameter> parameterList)
         {
-            OpenConnection("localhost", "BankDB", "srinivas", "Mysql@1234");
-            return new MySqlCommand(query, Connection);
-        }
-        public  Object ExecuteScalarAndCloseConnection(MySqlCommand cmd)
-        {
-            var value = cmd.ExecuteScalar();
+            var value = OpenConnectionAndCreateCommand(query,parameterList).ExecuteScalar();
             Connection.Close();
             return value;
         }
-        public  void ExecuteNonQueryAndCloseConnection(MySqlCommand cmd)
+        public  void ExecuteNonQuery(string query,List<MySqlParameter> parameterList)
         {
-            cmd.ExecuteNonQuery();
-            Connection.Close();
+            OpenConnectionAndCreateCommand(query, parameterList).ExecuteNonQuery();
         }
-        public  DataTable ExecuteDataAdapterAndCloseConnection(MySqlCommand cmd)
+        public  DataTable ExecuteDataAdapter(string query, List<MySqlParameter> parameterList)
         {
             DataTable dt = new DataTable();
+            var cmd = OpenConnectionAndCreateCommand(query, parameterList);
             var dataAdapter = new MySqlDataAdapter(cmd);
             dataAdapter.Fill(dt);
             Connection.Close();
