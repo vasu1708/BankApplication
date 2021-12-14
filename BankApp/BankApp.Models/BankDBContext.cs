@@ -16,12 +16,17 @@ namespace BankApp.Models
             modelBuilder.Entity<Bank>(entity =>
             {
                 entity.HasKey(id => id.BankId);
-                entity.Property(name=>name.BankName).IsRequired();
+                entity.Property(name => name.BankName).IsRequired();
             });
             modelBuilder.Entity<Account>(entity =>
             {
                 entity.HasKey(id => id.AccountId);
-                entity.Property(name=>name.AccountHolderName).IsRequired();
+                entity.Property(name => name.AccountHolderName).IsRequired();
+            });
+            modelBuilder.Entity<Transaction>(entity =>
+            {
+                entity.HasKey(id => id.TransactionId);
+                entity.Property(senderId => senderId.SenderAccountId).IsRequired();
             });
         }
     }
