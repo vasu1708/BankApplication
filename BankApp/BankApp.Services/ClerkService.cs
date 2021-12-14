@@ -67,7 +67,7 @@ namespace BankApp.Services
         {
             BankDbContext context = new BankDbContext();
             string accountId = GetAccountId(accountNumber);
-            return context.Transactions.Where(x => x.Accountid == accountId).ToList();
+            return context.Transactions.Where(x => x.AccountId == accountId).ToList();
         }
         public void RevertTransaction(string transactionId)
         {

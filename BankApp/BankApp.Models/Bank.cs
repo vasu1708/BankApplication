@@ -9,7 +9,7 @@ namespace BankApp.Models
 {
      public class Bank
     {
-        [Key]
+        
         public string BankId { get; set; }
         public string BankName { get; set; }
         public decimal BankBalance { get; set; }

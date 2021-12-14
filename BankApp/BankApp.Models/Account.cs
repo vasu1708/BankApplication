@@ -10,13 +10,10 @@ namespace BankApp.Models
 {
     public class Account
     {
-        [Key]
         public string AccountId { get; set; }
-        [ForeignKey("BankId")]
         public string BankId { get; set; }
         public string AccountHolderName { get; set; }
         public string AccountNumber { get; set; }
-
         public decimal AccountBalance { get; set; }
         public string AccountPassword { get; set; }
         public Enums.Gender Gender { get; set; }
