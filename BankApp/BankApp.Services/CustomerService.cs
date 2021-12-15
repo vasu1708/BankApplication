@@ -10,11 +10,13 @@ namespace BankApp.Services
             Account account = clerk.IsAccountExist(accountNo);
             clerk.PerformTransaction(accountNo,"-","-",Enums.TransactionType.CREDIT,amount);
             account.AccountBalance += amount;
+            new DbContextService().SaveChanges();
         }  
        public void  Withdraw(string accountNo,string password,decimal amount)
         {
             ClerkService clerk = new ClerkService();
             Account account = clerk.IsAccountExist(accountNo);
+            VerifyPassword(accountNo, password);
             if (amount < account.AccountBalance)
                 throw new Exception("Insufficient Balance!");
             clerk.PerformTransaction(accountNo, "-", "-", Enums.TransactionType.DEBIT, amount);
@@ -26,6 +28,7 @@ namespace BankApp.Services
             ClerkService clerk = new ClerkService();
             Account senderAccnt = clerk.IsAccountExist(senderAccountNo);
             Account receiverAccnt = clerk.IsAccountExist (receiverAccountNo);
+            VerifyPassword(senderAccnt.AccountNumber, passsword);
             if (amount < senderAccnt.AccountBalance)
                 throw new Exception("Insufficient Balance!");
             clerk.PerformTransaction(senderAccountNo, senderAccnt.AccountId, receiverAccnt.AccountId, Enums.TransactionType.DEBIT,amount);
@@ -34,13 +37,17 @@ namespace BankApp.Services
             receiverAccnt.AccountBalance += amount;
             new DbContextService().SaveChanges();
         }
-       public void TransactionHistory(string accountNumber,string password)
+       public List<string> TransactionHistory(string accountNumber,string password)
         {
-
+            VerifyPassword(accountNumber,password);
+           return new ClerkService().TransactionHistory(accountNumber);
         }
-       public bool VerifyPassword(string string passwor)
+       public bool VerifyPassword(string accountNumber,string password)
         {
-
+            Account account = new ClerkService().IsAccountExist(accountNumber);
+            if (account.AccountPassword != password)
+                throw new Exception("Incorrect Password!");
+            return true;
         }
     }
 }

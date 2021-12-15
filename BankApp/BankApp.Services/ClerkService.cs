@@ -28,7 +28,7 @@ namespace BankApp.Services
                 throw new Exception("Account not Exist");
             return account;
         }
-        public void CreateAccount(string bankName,string name,string password,String address,Enums.Gender gender,DateOnly dob,string mobileNumber)
+        public void CreateAccount(string bankName,string name,string password,string address,Enums.Gender gender,DateOnly dob,string mobileNumber)
         {
             
             DbContextService context = new DbContextService();
