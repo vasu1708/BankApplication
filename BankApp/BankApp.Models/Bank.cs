@@ -12,12 +12,12 @@ namespace BankApp.Models
         
         public string BankId { get; set; }
         public string BankName { get; set; }
+        public List<Account> Accounts { get; set; }
         public decimal BankBalance { get; set; }
         public decimal SameBankIMPS { get; set; }
         public decimal SameBankRTGS { get; set; }
         public decimal OtherBankIMPS { get; set; }
         public decimal OtherBankRTGS { get; set; }
-        public UInt32 AccountStartNumber { get; set; }
         public DateOnly EstablishedDate { get; set; }
     }
 }

@@ -11,9 +11,8 @@ namespace BankApp.Models
     public class Account
     {
         public string AccountId { get; set; }
-        public string BankId { get; set; }
-        public string AccountHolderName { get; set; }
         public string AccountNumber { get; set; }
+        public string AccountHolderName { get; set; }
         public decimal AccountBalance { get; set; }
         public string AccountPassword { get; set; }
         public Enums.Gender Gender { get; set; }
@@ -22,5 +21,7 @@ namespace BankApp.Models
         public DateOnly DateOfBirth { get; set; }
         public Enums.CurrencyType Currency { get; set; }
         public DateOnly AccountCreationDate { get; set; }
+        public List<Transaction> Transactions { get; set; }
+        public Bank Bank { get; set; }
     }
 }

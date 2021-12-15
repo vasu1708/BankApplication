@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BankApp.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace BankApp.Models
+namespace BankApp.Services
 {
-    internal class BankDBContext:DbContext
+    public class DbContextService:DbContext
     {
         public DbSet<Bank> Banks { get; set; }
         public DbSet<Account> Accounts { get; set; }
@@ -16,17 +17,17 @@ namespace BankApp.Models
             modelBuilder.Entity<Bank>(entity =>
             {
                 entity.HasKey(id => id.BankId);
-                entity.Property(name => name.BankName).IsRequired();
+                entity.HasMany(bank => bank.Accounts).WithOne();
             });
             modelBuilder.Entity<Account>(entity =>
             {
                 entity.HasKey(id => id.AccountId);
-                entity.Property(name => name.AccountHolderName).IsRequired();
+                entity.HasMany(accnt => accnt.Transactions).WithOne();
             });
             modelBuilder.Entity<Transaction>(entity =>
             {
                 entity.HasKey(id => id.TransactionId);
-                entity.Property(senderId => senderId.SenderAccountId).IsRequired();
+
             });
         }
     }
