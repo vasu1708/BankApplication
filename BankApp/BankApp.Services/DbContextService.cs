@@ -8,6 +8,7 @@ namespace BankApp.Services
         public DbSet<Bank> Banks { get; set; }
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<Clerk> Clerks { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseMySQL("server=localhost;Database=BankDatabase;UID=srinivas,Password=Mysql@1234");
@@ -28,6 +29,11 @@ namespace BankApp.Services
             {
                 entity.HasKey(id => id.TransactionId);
 
+            });
+            modelBuilder.Entity<Clerk>(entity =>
+            {
+                entity.HasKey(id => id.ClerkId);
+                entity.HasOne(clerk => clerk.Bank).WithMany(bank => bank.Clerks);
             });
         }
     }

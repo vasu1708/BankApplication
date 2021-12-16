@@ -11,7 +11,41 @@ namespace BankApp.Services
             clerk.PerformTransaction(accountNo,"-","-",Enums.TransactionType.CREDIT,amount);
             account.AccountBalance += amount;
             new DbContextService().SaveChanges();
-        }  
+        } 
+        public string AddBank(string bankName,string ClerkName,DateOnly dob,string address,string password,string mobileNumber,decimal salary)
+        {
+            string date = DateTime.Now.ToString("yyyy-MM-dd");
+            Bank bank = new Bank()
+            {
+                BankId = $"{bankName.Substring(0, 3)}{date}",
+                BankName = bankName,
+                BankBalance = 0,
+                SameBankIMPS = 3,
+                SameBankRTGS = 4,
+                OtherBankIMPS = 5,
+                OtherBankRTGS = 6,
+                EstablishedDate = DateOnly.FromDateTime(DateTime.Now),
+                Clerks = new List<Clerk>(),
+                Accounts = new List<Account>()
+            };
+            return AddClerk(bank, ClerkName, password, dob, address, mobileNumber);
+        }
+       public string AddClerk(Bank bank,string name,string password,DateOnly dob,string address,string mobileNumebr)
+        {
+            string clerkId = $"{name}@{bank.BankName}";
+            Clerk clerk = new Clerk()
+            {
+                ClerkId = clerkId,
+                ClerkName = name,
+                Password = password,
+                DateOfBirth = dob,
+                DateOfJoin = DateOnly.FromDateTime(DateTime.Now),
+                Address = address,
+                MobileNumber = mobileNumebr,
+                Bank = bank
+            };
+            return clerkId;
+        }
        public void  Withdraw(string accountNo,string password,decimal amount)
         {
             ClerkService clerk = new ClerkService();

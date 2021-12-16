@@ -7,7 +7,7 @@ using BankApp.Models;
 
 namespace BankApp.Services
 {
-    class ClerkService
+    public class ClerkService
     {
         public static string GetAccountNumber()
         {
@@ -28,17 +28,18 @@ namespace BankApp.Services
                 throw new Exception("Account not Exist");
             return account;
         }
-        public void CreateAccount(string bankName,string name,string password,string address,Enums.Gender gender,DateOnly dob,string mobileNumber)
+        public string CreateAccount(string bankName,string name,string password,string address,Enums.Gender gender,DateOnly dob,string mobileNumber)
         {
             
             DbContextService context = new DbContextService();
             string date = DateTime.Now.ToString("yyyy-MM-dd");
             string accountId = $"{name.Substring(0, 3)}{date}";
+            string accountNumber = GetAccountNumber();
             context.Accounts.Add( new Account()
             {
                 AccountId = accountId,
                 AccountHolderName = name,
-                AccountNumber = GetAccountNumber(),
+                AccountNumber = accountNumber,
                 AccountPassword = password,
                 AccountBalance = 0,
                 Address = address,
@@ -47,9 +48,11 @@ namespace BankApp.Services
                 MobileNumber = mobileNumber,
                 Currency = Enums.CurrencyType.INR,
                 AccountCreationDate = DateOnly.FromDateTime(DateTime.Now),
-                Bank = context.Banks.Single(bank => bank.BankName == bankName)
+                Bank = context.Banks.Single(bank => bank.BankName == bankName),
+                Transactions = new List<Transaction>()
             });
             context.SaveChanges();
+            return accountNumber;
         }
         public void DeleteAccount(string accountNumber)
         {
@@ -112,6 +115,31 @@ namespace BankApp.Services
             account.Transactions.Remove(transaction);
             new DbContextService().SaveChanges();
 
+        }
+        public bool VerifyPassword(string id, string password)
+        {
+            return new DbContextService().Clerks.Single(Clerk => Clerk.ClerkId == id).Password == password;
+        }
+        public void UpdateCharges(string id,Enums.ChargeType type,decimal charge)
+        {
+            DbContextService context = new DbContextService();
+            Bank bank = context.Clerks.Single(clerk => clerk.ClerkId == id).Bank;
+            switch (type)
+            {
+                case Enums.ChargeType.SameBankIMPS:
+                    bank.SameBankIMPS = charge;
+                    break;
+                case Enums.ChargeType.OtherBankIMPS:
+                    bank.OtherBankIMPS = charge;
+                    break;
+                case Enums.ChargeType.SameBankRTGS:
+                    bank.SameBankRTGS = charge;
+                    break;
+                default:
+                    bank.OtherBankRTGS = charge;
+                    break;
+            }
+            context.SaveChanges();
         }
     }
 }

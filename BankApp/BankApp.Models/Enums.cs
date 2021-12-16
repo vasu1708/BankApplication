@@ -23,6 +23,13 @@ namespace BankApp.Models
             CREDIT,
             DEBIT
         }
+        public enum ChargeType
+        {
+            SameBankIMPS,
+            OtherBankIMPS,
+            SameBankRTGS,
+            OtherBankRTGS
+        }
         public enum Login
         {
             ACCOUNTHOLDER = 1,
