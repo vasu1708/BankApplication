@@ -12,7 +12,7 @@ namespace BankApp.Services
             account.AccountBalance += amount;
             new DbContextService().SaveChanges();
         } 
-        public string AddBank(string bankName,string ClerkName,DateOnly dob,string address,string password,string mobileNumber,decimal salary)
+        public string AddBank(string bankName,string ClerkName,string dob,string address,string password,string mobileNumber,decimal salary)
         {
             string date = DateTime.Now.ToString("yyyy-MM-dd");
             Bank bank = new Bank()
@@ -24,13 +24,13 @@ namespace BankApp.Services
                 SameBankRTGS = 4,
                 OtherBankIMPS = 5,
                 OtherBankRTGS = 6,
-                EstablishedDate = DateOnly.FromDateTime(DateTime.Now),
+                EstablishedDate = DateTime.Now.Date,
                 Clerks = new List<Clerk>(),
                 Accounts = new List<Account>()
             };
             return AddClerk(bank, ClerkName, password, dob, address, mobileNumber);
         }
-       public string AddClerk(Bank bank,string name,string password,DateOnly dob,string address,string mobileNumebr)
+       public string AddClerk(Bank bank,string name,string password,string dob,string address,string mobileNumebr)
         {
             string clerkId = $"{name}@{bank.BankName}";
             Clerk clerk = new Clerk()
@@ -39,7 +39,7 @@ namespace BankApp.Services
                 ClerkName = name,
                 Password = password,
                 DateOfBirth = dob,
-                DateOfJoin = DateOnly.FromDateTime(DateTime.Now),
+                DateOfJoin = DateTime.Now.Date,
                 Address = address,
                 MobileNumber = mobileNumebr,
                 Bank = bank

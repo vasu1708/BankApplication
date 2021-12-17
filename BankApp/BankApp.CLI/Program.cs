@@ -1,7 +1,5 @@
 ﻿using BankApp.Models;
 using BankApp.Services;
-using System;
-using System.Collections.Generic;
 
 namespace BankApp.CLI
 {
@@ -24,7 +22,7 @@ namespace BankApp.CLI
                             /*IOMethods.DisplayOutputLine("Atleast one clerk should be added to maintain the bank");*/
                             string ClerkName = IOMethods.GetName("Add Clerk name : ");
                             password = IOMethods.GetString("Set password : ");
-                            DateOnly dob = IOMethods.GetDOB("Enter date Of Birth(DD-MM-YYYY) : ");
+                            string dob = IOMethods.GetDOB("Enter date Of Birth(DD-MM-YYYY) : ");
                             decimal salary = IOMethods.GetDecimal("Enter Salary(INR) : ");
                             string address = IOMethods.GetAddress();
                             string mobileNumber = IOMethods.GetMobileNumber("Enter Mobile No : ");
@@ -180,8 +178,9 @@ namespace BankApp.CLI
                                                             break;
 
                                                         case Enums.ClerkOperation.UPDATECHARGES:
-                                                            Enums.ChargeType charge = IOMethods.GetEnum<Enums.ChargeType>("Enter Type of charge(SameBankIMPS/OtherBankIMPS/SameBankRTGS/OtherBankRTGS) ");
-                                                            clerk.UpdateCharges(id,charge);
+                                                            Enums.ChargeType type = IOMethods.GetEnum<Enums.ChargeType>("Enter Type of charge(SameBankIMPS/OtherBankIMPS/SameBankRTGS/OtherBankRTGS) ");
+                                                            decimal charge = IOMethods.GetDecimal("Enter charge for that type : ");
+                                                            clerk.UpdateCharges(id,type,charge);
                                                             IOMethods.DisplayOutputLine("Successfully! Updates the charges");
                                                             break;
 

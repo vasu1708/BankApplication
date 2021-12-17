@@ -83,9 +83,9 @@ namespace BankApp.Services
             return GetMobileNumber(message);
 
         }
-        public static DateOnly GetDOB(string message)
+        public static string GetDOB(string message)
         {
-            /*string dob = GetString(message);
+            string dob = GetString(message);
             Regex dobpattern = new Regex(@"^\d{2}-\d{2}-\d{4}$");
             if (dobpattern.IsMatch(dob))
             {
@@ -105,10 +105,6 @@ namespace BankApp.Services
             }
 
             DisplayOutputLine("Proper date format must be given!");
-            return GetDOB(message);*/
-            if (DateOnly.TryParse(GetString(message), out DateOnly dob))
-                return dob;
-            DisplayOutputLine("Proper data must be given");
             return GetDOB(message);
         }
         public static string GetName(string message)

@@ -28,7 +28,7 @@ namespace BankApp.Services
                 throw new Exception("Account not Exist");
             return account;
         }
-        public string CreateAccount(string bankName,string name,string password,string address,Enums.Gender gender,DateOnly dob,string mobileNumber)
+        public string CreateAccount(string bankName,string name,string password,string address,Enums.Gender gender,string dob,string mobileNumber)
         {
             
             DbContextService context = new DbContextService();
@@ -47,7 +47,7 @@ namespace BankApp.Services
                 DateOfBirth = dob,
                 MobileNumber = mobileNumber,
                 Currency = Enums.CurrencyType.INR,
-                AccountCreationDate = DateOnly.FromDateTime(DateTime.Now),
+                AccountCreationDate = DateTime.Now.Date,
                 Bank = context.Banks.Single(bank => bank.BankName == bankName),
                 Transactions = new List<Transaction>()
             });

@@ -11,19 +11,19 @@ namespace BankApp.Services
         public DbSet<Clerk> Clerks { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySQL("server=localhost;Database=BankDatabase;UID=srinivas,Password=Mysql@1234");
+            optionsBuilder.UseSqlServer("Data Source=DESKTOP-AALRII2;Initial Catalog=BankDB;Integrated Security=True");
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Bank>(entity =>
             {
                 entity.HasKey(id => id.BankId);
-                entity.HasMany(bank => bank.Accounts).WithOne();
+                entity.HasMany(bank => bank.Accounts);
             });
             modelBuilder.Entity<Account>(entity =>
             {
                 entity.HasKey(id => id.AccountId);
-                entity.HasMany(accnt => accnt.Transactions).WithOne();
+                entity.HasMany(accnt => accnt.Transactions);
             });
             modelBuilder.Entity<Transaction>(entity =>
             {

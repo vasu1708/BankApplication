@@ -18,9 +18,9 @@ namespace BankApp.Models
         public Enums.Gender Gender { get; set; }
         public string Address { get; set; }
         public string MobileNumber { get; set; }
-        public DateOnly DateOfBirth { get; set; }
+        public string DateOfBirth { get; set; }
         public Enums.CurrencyType Currency { get; set; }
-        public DateOnly AccountCreationDate { get; set; }
+        public DateTime AccountCreationDate { get; set; }
         public List<Transaction> Transactions { get; set; }
         public Bank Bank { get; set; }
     }

@@ -18,7 +18,7 @@ namespace BankApp.Models
         public decimal SameBankRTGS { get; set; }
         public decimal OtherBankIMPS { get; set; }
         public decimal OtherBankRTGS { get; set; }
-        public DateOnly EstablishedDate { get; set; }
+        public DateTime EstablishedDate { get; set; }
         public List<Clerk> Clerks { get; set; }
     }
 }
