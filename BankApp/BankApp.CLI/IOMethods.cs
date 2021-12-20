@@ -9,11 +9,11 @@ namespace BankApp.Services
         public static void DisplayOutput(List<string> history)
         {
             DisplayOutputLine("<---TRANSACTION HISTORY--->");
-            if (history.Count != 0)
+            if (history.Count == 0)
                 DisplayOutputLine("No Transactions yet!");
             else
             {
-                DisplayOutputLine($"transactionId SenderId ReceiverId Type Amount Time Avl.Bal");
+                DisplayOutputLine($"transactionId SenderId ReceiverId Type Amount Time");
                 foreach (var Txn in history)
                 {
                     DisplayOutputLine(Txn);

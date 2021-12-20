@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankApp.Services.Migrations
 {
     [DbContext(typeof(DbContextService))]
-    [Migration("20211220053704_changes")]
-    partial class changes
+    [Migration("20211220135131_currencyinTransactionentity")]
+    partial class currencyinTransactionentity
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -158,6 +158,9 @@ namespace BankApp.Services.Migrations
 
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("Currency")
+                        .HasColumnType("int");
 
                     b.Property<string>("ReceiverAccountId")
                         .IsRequired()

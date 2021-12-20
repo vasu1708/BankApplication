@@ -30,6 +30,8 @@ namespace BankApp.CLI
 
                         case Enums.Action.LOGIN:                        
                             bankName = IOMethods.GetNameWithoutSpaces("Enter Bank name : ");
+                            CustomerService customer = new CustomerService();
+                            customer.IsBankExist(bankName);
                             bool LoginFlag = true;
                             Enums.Login login;
                             while (LoginFlag)
@@ -44,7 +46,6 @@ namespace BankApp.CLI
                                             Enums.CustomerOperation CustOp;
                                             decimal amount;
                                             bool customerFlag = true;
-                                            CustomerService customer = new CustomerService();
                                             accountNumber = IOMethods.GetString("Account Number : ");
                                             new ClerkService().IsAccountExist(accountNumber);
                                             while (customerFlag)
@@ -70,11 +71,11 @@ namespace BankApp.CLI
 
                                                         case Enums.CustomerOperation.TRANSFER:
                                                             amount = IOMethods.GetDecimal($"Enter amount : ");
-                                                            string ReceiverBankName = IOMethods.GetName("Reciever Bank name : ");
-                                                            string ReceiverAccountNumber = IOMethods.GetName("Receiver Account Number : ");
-                                                            Enums.TypeOfTransfer TypeOfTransfer = IOMethods.GetEnum<Enums.TypeOfTransfer>("Type of Transfer (IMPS/RTGS) : ");
+                                                            string receiverBankName = IOMethods.GetName("Reciever Bank name : ");
+                                                            string receiverAccountNumber = IOMethods.GetString("Receiver Account Number : ");
+                                                            Enums.TypeOfTransfer transferType = IOMethods.GetEnum<Enums.TypeOfTransfer>("Type of Transfer (IMPS/RTGS) : ");
                                                             password = IOMethods.GetString("Account password : ");
-                                                            customer.Transfer(accountNumber, ReceiverAccountNumber, password, amount );
+                                                            customer.Transfer(bankName,accountNumber,receiverBankName, receiverAccountNumber, password,transferType, amount );
                                                             IOMethods.DisplayOutputLine("Successfully! Transfered your amount");
                                                             break;
 
@@ -179,7 +180,7 @@ namespace BankApp.CLI
                                                         case Enums.ClerkOperation.UPDATECHARGES:
                                                             Enums.ChargeType type = IOMethods.GetEnum<Enums.ChargeType>("Enter Type of charge(SameBankIMPS/OtherBankIMPS/SameBankRTGS/OtherBankRTGS) ");
                                                             decimal charge = IOMethods.GetDecimal("Enter charge for that type : ");
-                                                            clerk.UpdateCharges(id,type,charge);
+                                                            clerk.UpdateCharges(bankName,type,charge);
                                                             IOMethods.DisplayOutputLine("Successfully! Updates the charges");
                                                             break;
 

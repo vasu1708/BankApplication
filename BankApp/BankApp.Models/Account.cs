@@ -21,7 +21,8 @@ namespace BankApp.Models
         public string DateOfBirth { get; set; }
         public Enums.CurrencyType Currency { get; set; }
         public DateTime AccountCreationDate { get; set; }
-        public List<Transaction> Transactions { get; set; }
+        public string BankId { get; set; }
         public Bank Bank { get; set; }
+        public List<Transaction>? Transactions { get; set; }
     }
 }

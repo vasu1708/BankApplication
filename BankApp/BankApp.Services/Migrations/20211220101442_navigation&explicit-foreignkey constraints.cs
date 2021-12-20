@@ -4,7 +4,7 @@
 
 namespace BankApp.Services.Migrations
 {
-    public partial class relationestd : Migration
+    public partial class navigationexplicitforeignkeyconstraints : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -17,23 +17,29 @@ namespace BankApp.Services
         {
             modelBuilder.Entity<Bank>(entity =>
             {
-                entity.HasKey(id => id.BankId);
-                entity.HasMany(bank => bank.Accounts);
+                entity.HasKey(b => b.BankId);
             });
             modelBuilder.Entity<Account>(entity =>
             {
-                entity.HasKey(id => id.AccountId);
-                entity.HasMany(accnt => accnt.Transactions);
+                entity.HasKey(a => a.AccountId);
+                entity.HasOne(a => a.Bank)
+                .WithMany(b => b.Accounts)
+                .HasForeignKey(a => a.BankId);
             });
             modelBuilder.Entity<Transaction>(entity =>
             {
-                entity.HasKey(id => id.TransactionId);
+                entity.HasKey(t => t.TransactionId);
+                entity.HasOne(t => t.Account)
+                .WithMany(a => a.Transactions)
+                .HasForeignKey(t => t.AccountId);
 
             });
             modelBuilder.Entity<Clerk>(entity =>
             {
-                entity.HasKey(id => id.ClerkId);
-                entity.HasOne(clerk => clerk.Bank).WithMany(bank => bank.Clerks);
+                entity.HasKey(c => c.ClerkId);
+                entity.HasOne(c => c.Bank)
+                .WithMany(b => b.Clerks)
+                .HasForeignKey(c => c.BankId);
             });
         }
     }

@@ -15,18 +15,18 @@ namespace BankApp.Services
             uint AccountNo = (UInt32)random.Next(111111111, 999999999);
             return AccountNo.ToString();
         }
-        public Account GetAccount(string accountNumber)
+        public string GetAccountId(string accountNumber)
         {
             DbContextService context = new DbContextService();
-            var account = context.Accounts.Single(x => x.AccountNumber == accountNumber);
-            return account;
+            var accountId = context.Accounts.Single(x => x.AccountNumber == accountNumber).AccountId;
+            return accountId;
         }
-        public Account IsAccountExist(string accountNumber)
+        public string IsAccountExist(string accountNumber)
         {
-            var account = GetAccount(accountNumber);
-            if(account == null)
+            var accountId = GetAccountId(accountNumber);
+            if(accountId == null)
                 throw new Exception("Account not Exist");
-            return account;
+            return accountId;
         }
         public string CreateAccount(string bankName,string name,string password,string address,Enums.Gender gender,string dob,string mobileNumber)
         {
@@ -58,76 +58,111 @@ namespace BankApp.Services
         public void DeleteAccount(string accountNumber)
         {
             DbContextService context = new DbContextService();
-            var account = IsAccountExist(accountNumber);
+            string accountId = IsAccountExist(accountNumber);
+            var account = context.Accounts.Single(a => a.AccountId == accountId);
             context.Accounts.Remove(account);
             context.SaveChanges();
         }
         public void UpdateMobileNumber(string accountNumber,string mobileNumber)
         {
-            var account = IsAccountExist(accountNumber);
-            account.MobileNumber = mobileNumber;
-            new DbContextService().SaveChanges();
+            DbContextService context = new DbContextService();
+            string accountId = IsAccountExist(accountNumber);
+            context.Accounts.Single(a => a.AccountId == accountId).MobileNumber = mobileNumber;
+            context.SaveChanges();
         }
         public void UpdateAddress(string accountNumber,string address)
         {
-            var account = IsAccountExist(accountNumber);
-            account.Address = address;
-            new DbContextService().SaveChanges();
+            DbContextService context = new DbContextService();
+            string accountId = IsAccountExist(accountNumber);
+            context.Accounts.Single(a => a.AccountId == accountId).Address = address;
+            context.SaveChanges();
         }
         public void UpdateCurrency(string accountNumber,Enums.CurrencyType currency)
         {
-            var account = IsAccountExist(accountNumber);
-            account.Currency = currency;
-            new DbContextService().SaveChanges();
+            DbContextService context = new DbContextService();
+            string accountId = IsAccountExist(accountNumber);
+            Account account = context.Accounts.Single(a => a.AccountId == accountId);
+           if( account.Currency == currency)
+                throw new Exception("Oops! it is same as earlier");
+            switch (currency)
+            {
+                case Enums.CurrencyType.INR:
+                    account.AccountBalance *= 70;
+                    break;
+                case Enums.CurrencyType.INUSD:
+                    account.AccountBalance /= 70;
+                    break;
+            }
+            context.SaveChanges();
         }
         public List<string> TransactionHistory(string accountNumber)
         {
             List<string> transactionList = new List<string>();
             DbContextService context = new DbContextService();
-            var account = context.Accounts.Single(accnt => accnt.AccountNumber == accountNumber);
+            string accountId = IsAccountExist(accountNumber);
+            var txns = context.Transactions.Where(a => a.AccountId == accountId).ToList();
             string transaction;
-            foreach(var txn in account.Transactions)
+            foreach(var txn in txns)
             {
-                transaction = @"{txn.TransactionId} {txn.SenderAccountId} {txn.ReceiverAccountId} {txn.TransactionType} {txn.Amount}";
+                transaction = $"{txn.TransactionId} {txn.SenderAccountId} {txn.ReceiverAccountId} {txn.TransactionType} {txn.Amount}({txn.Currency}) {txn.TimeOfTransaction}";
                 transactionList.Add(transaction);
             }
-            return new List<string>();
+            return transactionList;
         }
-        public void PerformTransaction(string accountNumber,string senderId, string receiverId, Enums.TransactionType transactionType, decimal amount)
+        public decimal GetAccountBalance(string accountNumber)
+        {
+            return new DbContextService().Accounts.Single(a => a.AccountId == IsAccountExist(accountNumber)).AccountBalance;
+        }
+        public Enums.CurrencyType GetCurrencyType(string accountNumber)
+        {
+            return new DbContextService().Accounts.Single(a => a.AccountId == IsAccountExist(accountNumber)).Currency;
+        }
+        public void PerformTransaction(string accountId,string senderId, string receiverId, Enums.TransactionType transactionType, decimal amount)
         {
             DbContextService context = new DbContextService();
-            Account account = context.Accounts.Single(account => account.AccountNumber == accountNumber);
+            Account account = context.Accounts.Single(account => account.AccountId == accountId);
+            if (transactionType == Enums.TransactionType.CREDIT)
+                account.AccountBalance += amount;
+            else
+            {
+                if (account.AccountBalance < amount)
+                    throw new Exception("Insufficient Balance!");
+                account.AccountBalance -= amount;
+            }
             string date = DateTime.Now.ToString("dd-mm-yyyy");
             context.Transactions.Add(new Transaction()
             {
-                TransactionId = $"TXN{account.Bank.BankId}{senderId}{date}",
+                TransactionId = $"TXN{account.BankId}{senderId}{date}",
                 SenderAccountId = senderId,
                 ReceiverAccountId = receiverId,
                 Amount = amount,
                 TransactionType = transactionType,
                 TimeOfTransaction = DateTime.Now,
+                Currency = account.Currency,
                 Account = account
             });
+            
             context.SaveChanges();
         }
         public void RevertTransaction(string accountNumber,string transactionId)
         {
-            var account = IsAccountExist(accountNumber);
-            var transaction = account.Transactions.Single(x => x.TransactionId == transactionId);
+            var accountId = IsAccountExist(accountNumber);
+            DbContextService context = new DbContextService();
+            var transaction = context.Transactions.Single(x => x.TransactionId == transactionId);
             if (transaction == null)
                 throw new Exception("Invalid Transaction");
-            account.Transactions.Remove(transaction);
-            new DbContextService().SaveChanges();
-
+            context.Transactions.Remove(transaction);
+            context.SaveChanges();
         }
         public bool VerifyPassword(string id, string password)
         {
             return new DbContextService().Clerks.Single(Clerk => Clerk.ClerkId == id).Password == password;
         }
-        public void UpdateCharges(string id,Enums.ChargeType type,decimal charge)
+        public void UpdateCharges(string bankName,Enums.ChargeType type,decimal charge)
         {
             DbContextService context = new DbContextService();
-            Bank bank = context.Clerks.Single(clerk => clerk.ClerkId == id).Bank;
+            string bankId = new CustomerService().GetBankId(bankName);
+            Bank bank = context.Banks.Single(b => b.BankId == bankId);
             switch (type)
             {
                 case Enums.ChargeType.SameBankIMPS:

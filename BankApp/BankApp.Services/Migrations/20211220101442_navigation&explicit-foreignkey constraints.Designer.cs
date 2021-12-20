@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankApp.Services.Migrations
 {
     [DbContext(typeof(DbContextService))]
-    [Migration("20211217162408_relation estd")]
-    partial class relationestd
+    [Migration("20211220101442_navigation&explicit-foreignkey constraints")]
+    partial class navigationexplicitforeignkeyconstraints
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
