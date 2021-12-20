@@ -12,12 +12,14 @@ namespace BankApp.Services
             account.AccountBalance += amount;
             new DbContextService().SaveChanges();
         } 
-        public string AddBank(string bankName,string ClerkName,string dob,string address,string password,string mobileNumber,decimal salary)
+        public string AddBank(string bankName,string clerkName,string dob,string address,string password,string mobileNumber)
         {
             string date = DateTime.Now.ToString("yyyy-MM-dd");
+            DbContextService context = new DbContextService();
+            string bankId = $"{bankName.Substring(0, 3)}{date}";
             Bank bank = new Bank()
             {
-                BankId = $"{bankName.Substring(0, 3)}{date}",
+                BankId = bankId,
                 BankName = bankName,
                 BankBalance = 0,
                 SameBankIMPS = 3,
@@ -28,10 +30,15 @@ namespace BankApp.Services
                 Clerks = new List<Clerk>(),
                 Accounts = new List<Account>()
             };
-            return AddClerk(bank, ClerkName, password, dob, address, mobileNumber);
+            context.Banks.Add(bank);
+            context.SaveChanges();
+            return AddClerk(bankId, clerkName, password, dob, address, mobileNumber);
         }
-       public string AddClerk(Bank bank,string name,string password,string dob,string address,string mobileNumebr)
+       public string AddClerk(string bankId,string name,string password,string dob,string address,string mobileNumber)
         {
+            
+            DbContextService context = new DbContextService();
+            Bank bank = context.Banks.Single(b => b.BankId == bankId);
             string clerkId = $"{name}@{bank.BankName}";
             Clerk clerk = new Clerk()
             {
@@ -41,9 +48,11 @@ namespace BankApp.Services
                 DateOfBirth = dob,
                 DateOfJoin = DateTime.Now.Date,
                 Address = address,
-                MobileNumber = mobileNumebr,
+                MobileNumber = mobileNumber,
                 Bank = bank
             };
+            context.Clerks.Add(clerk);
+            context.SaveChanges();
             return clerkId;
         }
        public void  Withdraw(string accountNo,string password,decimal amount)

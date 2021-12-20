@@ -32,10 +32,14 @@ namespace BankApp.Services
         {
             DisplayOutput(message);
             string input = Console.ReadLine();
-            if (input.Length != 0)
+            if (input!=null)
                 return input;
             DisplayOutputLine("input cannot be empty!");
             return GetString(message);
+        }
+        public static string GetNameWithoutSpaces(string message)
+        {
+            return GetName(message).Replace(" ", "");
         }
         public static string GetLowerCase(string message)
         {

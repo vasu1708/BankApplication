@@ -18,20 +18,18 @@ namespace BankApp.CLI
                     switch (Action)
                     {
                         case Enums.Action.NEWBANK:                        
-                            bankName = IOMethods.GetName("Bank name To Setup : ");
-                            /*IOMethods.DisplayOutputLine("Atleast one clerk should be added to maintain the bank");*/
+                            bankName = IOMethods.GetNameWithoutSpaces("Bank name To Setup : ");
                             string ClerkName = IOMethods.GetName("Add Clerk name : ");
                             password = IOMethods.GetString("Set password : ");
                             string dob = IOMethods.GetDOB("Enter date Of Birth(DD-MM-YYYY) : ");
-                            decimal salary = IOMethods.GetDecimal("Enter Salary(INR) : ");
                             string address = IOMethods.GetAddress();
                             string mobileNumber = IOMethods.GetMobileNumber("Enter Mobile No : ");
-                            string id = new CustomerService().AddBank(bankName,ClerkName,dob,address,password,mobileNumber,salary);
+                            string id = new CustomerService().AddBank(bankName,ClerkName,dob,address,password,mobileNumber);
                             IOMethods.DisplayOutputLine($"{bankName} is eshtablished, Remember! clerk Id : {id}");
                             break;
 
                         case Enums.Action.LOGIN:                        
-                            bankName = IOMethods.GetName("Enter Bank name : ");
+                            bankName = IOMethods.GetNameWithoutSpaces("Enter Bank name : ");
                             bool LoginFlag = true;
                             Enums.Login login;
                             while (LoginFlag)
@@ -46,8 +44,9 @@ namespace BankApp.CLI
                                             Enums.CustomerOperation CustOp;
                                             decimal amount;
                                             bool customerFlag = true;
-                                            accountNumber = IOMethods.GetString("Account Number : ");
                                             CustomerService customer = new CustomerService();
+                                            accountNumber = IOMethods.GetString("Account Number : ");
+                                            new ClerkService().IsAccountExist(accountNumber);
                                             while (customerFlag)
                                             {
                                                 message = "\n1.Deposit\n2.Withdraw\n3.Transfer\n4.Transaction history\n5.Exit\nEnter Operation No : ";
@@ -105,7 +104,7 @@ namespace BankApp.CLI
                                             id = IOMethods.GetLowerCase("Clerk ID : ");
                                             password = IOMethods.GetString("password : ");
                                             ClerkService clerk = new ClerkService();
-                                            if (clerk.VerifyPassword(id,password))
+                                            if (!clerk.VerifyPassword(id,password))
                                             {
                                                 IOMethods.DisplayOutputLine("Invalid Id or password");
                                                 break;

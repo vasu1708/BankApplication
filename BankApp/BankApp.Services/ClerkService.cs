@@ -35,7 +35,8 @@ namespace BankApp.Services
             string date = DateTime.Now.ToString("yyyy-MM-dd");
             string accountId = $"{name.Substring(0, 3)}{date}";
             string accountNumber = GetAccountNumber();
-            context.Accounts.Add( new Account()
+            Bank bank = context.Banks.Single(bank => bank.BankName == bankName);
+            context.Accounts.Add(new Account()
             {
                 AccountId = accountId,
                 AccountHolderName = name,
@@ -48,7 +49,7 @@ namespace BankApp.Services
                 MobileNumber = mobileNumber,
                 Currency = Enums.CurrencyType.INR,
                 AccountCreationDate = DateTime.Now.Date,
-                Bank = context.Banks.Single(bank => bank.BankName == bankName),
+                Bank = bank,
                 Transactions = new List<Transaction>()
             });
             context.SaveChanges();
@@ -95,15 +96,18 @@ namespace BankApp.Services
         public void PerformTransaction(string accountNumber,string senderId, string receiverId, Enums.TransactionType transactionType, decimal amount)
         {
             DbContextService context = new DbContextService();
-            context.Transactions.Add(new Transaction
+            Account account = context.Accounts.Single(account => account.AccountNumber == accountNumber);
+            string date = DateTime.Now.ToString("dd-mm-yyyy");
+            context.Transactions.Add(new Transaction()
             {
+                TransactionId = $"TXN{account.Bank.BankId}{senderId}{date}",
                 SenderAccountId = senderId,
                 ReceiverAccountId = receiverId,
                 Amount = amount,
                 TransactionType = transactionType,
                 TimeOfTransaction = DateTime.Now,
-                Account = context.Accounts.Single(account => account.AccountNumber == accountNumber)
-            }) ;
+                Account = account
+            });
             context.SaveChanges();
         }
         public void RevertTransaction(string accountNumber,string transactionId)
